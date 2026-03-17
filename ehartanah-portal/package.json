@@ -1,0 +1,9 @@
+{
+  "name": "ehartanah-portal",
+  "version": "1.0.0",
+  "description": "e-Hartanah Portal Pengurusan Hartanah Persekutuan",
+  "scripts": {
+    "dev": "npx serve . --listen 3100 --no-clipboard",
+    "start": "npx serve . --listen 3100"
+  }
+}

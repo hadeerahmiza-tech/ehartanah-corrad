@@ -13,7 +13,7 @@
   --color-info:      65, 133, 242;   /* blue */
   --color-warning:   246, 141, 32;   /* orange */
   --color-danger:    229, 83, 69;    /* red */
-  --bg-1:            243, 244, 246;  /* page background */
+  --bg-1:            249, 250, 251;  /* page background — gray-50 */
   --bg-2:            255, 255, 255;  /* card / white */
   --border-color:    228, 228, 231;  /* subtle border */
   --text-color:      9, 9, 11;       /* near-black */
@@ -45,32 +45,35 @@ html, body {
 
 /* ── Sidebar ───────────────────────────────── */
 #sidebar {
-  background-color: rgb(var(--color-primary));
+  background-color: rgb(var(--bg-2));   /* white — eATOM style */
+  border-right: 1px solid rgb(var(--border-color));
   transition: transform 0.25s ease-in-out;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.15) transparent;
+  scrollbar-color: rgb(var(--border-color)) transparent;
 }
 #sidebar::-webkit-scrollbar { width: 4px; }
-#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: rgb(var(--border-color)); border-radius: 4px; }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: var(--rounded-btn);
   font-size: 13px;
   font-weight: 500;
-  color: #94a3b8;
+  color: #374151;   /* gray-700 — dark text on white sidebar */
   transition: background var(--animation-btn), color var(--animation-btn);
   text-decoration: none;
   letter-spacing: 0.01em;
 }
-.nav-link:hover { background: rgba(255,255,255,.08); color: #e2e8f0; }
+.nav-link:hover { background: #f9fafb; color: rgb(var(--color-primary)); }
 .nav-link.active {
-  background: rgb(var(--color-secondary));
+  background: #f3f4f6;   /* gray-100 */
   color: rgb(var(--color-primary));
   font-weight: 700;
+  border-left: 2.5px solid rgb(var(--color-secondary));
+  padding-left: 10px;
 }
 .nav-link svg { flex-shrink: 0; width: 18px; height: 18px; }
 
