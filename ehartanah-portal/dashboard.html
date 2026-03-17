@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard – e-Hartanah Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:({opacityValue:o})=>o!=null?`rgba(var(--color-primary),${o})`:`rgb(var(--color-primary))`,secondary:({opacityValue:o})=>o!=null?`rgba(var(--color-secondary),${o})`:`rgb(var(--color-secondary))`},fontFamily:{sans:["'Space Grotesk'","system-ui","sans-serif"]}}}}</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -17,7 +18,7 @@
 
   <!-- ── Sidebar ─────────────────────────────────────────── -->
   <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+    class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col
            -translate-x-full transition-transform duration-300
            lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0">
   </aside>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Penyelenggaraan – e-Hartanah Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:({opacityValue:o})=>o!=null?`rgba(var(--color-primary),${o})`:`rgb(var(--color-primary))`,secondary:({opacityValue:o})=>o!=null?`rgba(var(--color-secondary),${o})`:`rgb(var(--color-secondary))`},fontFamily:{sans:["'Space Grotesk'","system-ui","sans-serif"]}}}}</script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-slate-100 font-sans">
@@ -13,7 +14,7 @@
 
 <div class="flex h-screen overflow-hidden">
   <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+    class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col
            -translate-x-full transition-transform duration-300
            lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0"></aside>
 

@@ -5,48 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log Masuk – e-Hartanah Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:({opacityValue:o})=>o!=null?`rgba(var(--color-primary),${o})`:`rgb(var(--color-primary))`,secondary:({opacityValue:o})=>o!=null?`rgba(var(--color-secondary),${o})`:`rgb(var(--color-secondary))`},fontFamily:{sans:["'Space Grotesk'","system-ui","sans-serif"]}}}}</script>
   <link rel="stylesheet" href="css/styles.css">
   <style>
+    /* Login page — matches corrad primary dark navy */
     .login-bg {
-      background: linear-gradient(135deg, #0d2137 0%, #0f3460 40%, #1a5276 100%);
+      background: linear-gradient(135deg, rgb(13,27,42) 0%, rgb(9,20,34) 55%, rgb(13,27,42) 100%);
     }
     .glass-card {
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255,255,255,0.98);
     }
     .pattern-overlay {
-      background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.06) 1px, transparent 0);
-      background-size: 30px 30px;
+      background-image: radial-gradient(circle at 2px 2px, rgba(97,176,183,0.07) 1px, transparent 0);
+      background-size: 28px 28px;
+    }
+    /* Override Tailwind rounded for corrad .2rem style */
+    .login-input {
+      border-radius: 0.2rem !important;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .login-btn {
+      border-radius: 0.2rem !important;
+      font-family: 'Space Grotesk', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
     }
   </style>
 </head>
 <body class="login-bg min-h-screen flex items-center justify-center p-4">
   <div class="pattern-overlay fixed inset-0 pointer-events-none"></div>
 
-  <!-- Decorative shapes -->
-  <div class="fixed top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
-  <div class="fixed bottom-0 left-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2"></div>
+  <!-- Decorative glow — teal to match secondary colour -->
+  <div class="fixed top-0 right-0 w-96 h-96 blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"
+       style="background:rgba(97,176,183,.12);border-radius:50%"></div>
+  <div class="fixed bottom-0 left-0 w-80 h-80 blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2"
+       style="background:rgba(97,176,183,.08);border-radius:50%"></div>
 
   <div class="w-full max-w-md relative z-10">
 
     <!-- Logo / Brand -->
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-2xl shadow-2xl mb-4">
-        <span class="text-white font-black text-2xl tracking-tight">eH</span>
+      <!-- Square logo matching corrad --rounded-btn: 0.2rem -->
+      <div class="inline-flex items-center justify-center w-16 h-16 shadow-2xl mb-4"
+           style="background:rgb(97,176,183);border-radius:0.2rem">
+        <span style="color:rgb(13,27,42);font-weight:900;font-size:22px;letter-spacing:-1px;font-family:'Space Grotesk',sans-serif">eH</span>
       </div>
-      <h1 class="text-3xl font-black text-white tracking-tight">e-Hartanah</h1>
-      <p class="text-blue-200 text-sm mt-1 font-medium">Portal Pengurusan Hartanah Persekutuan</p>
-      <p class="text-blue-300/70 text-xs mt-1">Jabatan Ketua Pengarah Tanah & Galian Persekutuan</p>
+      <h1 class="text-3xl font-black text-white" style="font-family:'Space Grotesk',sans-serif;letter-spacing:-0.5px">e-Hartanah</h1>
+      <p class="text-sm mt-1 font-medium" style="color:rgb(97,176,183);font-family:'Space Grotesk',sans-serif">Portal Pengurusan Hartanah Persekutuan</p>
+      <p class="text-xs mt-1" style="color:rgba(97,176,183,.6);font-family:'Space Grotesk',sans-serif">Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan</p>
     </div>
 
     <!-- Login Card -->
-    <div class="glass-card rounded-2xl shadow-2xl overflow-hidden">
+    <div class="glass-card shadow-2xl overflow-hidden" style="border-radius:0.2rem">
 
-      <!-- Card Header -->
-      <div class="bg-gradient-to-r from-blue-700 to-blue-800 px-6 py-4">
-        <h2 class="text-white font-bold text-base">Log Masuk Sistem</h2>
-        <p class="text-blue-200 text-xs mt-0.5">Sila masukkan maklumat pengguna anda</p>
+      <!-- Card Header — corrad primary dark stripe -->
+      <div class="px-6 py-4" style="background:rgb(13,27,42)">
+        <h2 class="text-white font-bold text-sm uppercase tracking-widest" style="font-family:'Space Grotesk',sans-serif">Log Masuk Sistem</h2>
+        <p class="text-xs mt-0.5" style="color:rgb(97,176,183);font-family:'Space Grotesk',sans-serif;opacity:.8">Sila masukkan maklumat pengguna anda</p>
       </div>
 
       <!-- Demo notice -->
@@ -97,7 +113,7 @@
         </div>
 
         <button type="submit" id="login-btn"
-          class="w-full btn btn-primary justify-center py-2.5 text-base rounded-xl shadow-lg hover:shadow-xl">
+          class="w-full btn btn-primary login-btn justify-center py-3 text-sm shadow-lg">
           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
           </svg>

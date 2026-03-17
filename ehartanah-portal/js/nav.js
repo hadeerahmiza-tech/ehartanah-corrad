@@ -69,33 +69,37 @@ const ehPortal = {
       </a>`).join('');
 
     return `
+    <!-- Logo — teal accent bar on left edge, matching corrad primary+secondary -->
     <div class="flex items-center gap-3 px-4 py-4 border-b border-white/10 flex-shrink-0">
-      <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-        <span class="text-white font-black text-sm tracking-tight">eH</span>
+      <div class="w-9 h-9 flex items-center justify-center flex-shrink-0"
+           style="background:rgb(var(--color-secondary));border-radius:var(--rounded-btn)">
+        <span style="color:rgb(var(--color-primary));font-weight:900;font-size:13px;letter-spacing:-0.5px">eH</span>
       </div>
       <div class="leading-tight">
-        <p class="text-white font-bold text-sm">e-Hartanah</p>
-        <p class="text-slate-400 text-[11px]">Portal Pengurusan</p>
+        <p class="text-white font-bold text-sm" style="font-family:'Space Grotesk',sans-serif">e-Hartanah</p>
+        <p style="color:rgb(var(--color-secondary));font-size:10px;font-family:'Space Grotesk',sans-serif;opacity:.8">Portal Pengurusan</p>
       </div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-      <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-2 mb-2">Menu Utama</p>
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+      <p style="font-size:9px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.1em;padding:0 8px;margin-bottom:8px;font-family:'Space Grotesk',sans-serif">Menu Utama</p>
       ${items}
     </nav>
 
     <div class="px-4 py-3 border-t border-white/10 flex-shrink-0">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-          <span class="text-white text-xs font-bold">${(user.name || 'U').charAt(0).toUpperCase()}</span>
+        <div class="w-8 h-8 flex items-center justify-center flex-shrink-0"
+             style="background:rgb(var(--color-secondary));border-radius:var(--rounded-btn)">
+          <span style="color:rgb(var(--color-primary));font-size:12px;font-weight:800">${(user.name || 'U').charAt(0).toUpperCase()}</span>
         </div>
         <div class="overflow-hidden">
-          <p class="text-white text-xs font-semibold truncate" id="user-name">${user.name || 'Pengguna'}</p>
-          <p class="text-slate-400 text-[11px] truncate" id="user-role">${user.role || 'Staff'}</p>
+          <p class="text-white font-semibold truncate text-xs" id="user-name">${user.name || 'Pengguna'}</p>
+          <p style="color:rgb(var(--color-secondary));font-size:10px;opacity:.85" class="truncate" id="user-role">${user.role || 'Staff'}</p>
         </div>
       </div>
       <button data-logout onclick="ehPortal.logout()"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:bg-white/10 hover:text-white text-xs font-medium transition-all">
+        class="w-full flex items-center gap-2 px-3 py-2 text-slate-400 hover:bg-white/10 hover:text-white text-xs font-medium transition-all uppercase tracking-wider"
+        style="border-radius:var(--rounded-btn);font-family:'Space Grotesk',sans-serif">
         <svg class="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
         </svg>
@@ -110,14 +114,18 @@ const ehPortal = {
     const notifCount = (window.mockNotifications || []).length;
     return `
     <div class="flex items-center gap-3">
-      <button id="menu-btn" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
+      <button id="menu-btn" class="lg:hidden p-2 hover:bg-slate-100 transition-colors" style="border-radius:var(--rounded-btn)">
         <svg class="w-5 h-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
         </svg>
       </button>
-      <div>
-        <h1 class="text-base font-bold text-slate-800 leading-tight">${pageTitle}</h1>
-        <p class="text-xs text-slate-400 hidden sm:block">Jabatan Ketua Pengarah Tanah & Galian Persekutuan</p>
+      <!-- Left accent bar matching corrad header style -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-1 h-8 hidden sm:block" style="background:rgb(var(--color-secondary));border-radius:2px"></div>
+        <div>
+          <h1 style="font-size:14px;font-weight:800;color:rgb(var(--color-primary));text-transform:uppercase;letter-spacing:0.05em;line-height:1.2;font-family:'Space Grotesk',sans-serif">${pageTitle}</h1>
+          <p class="text-xs text-slate-400 hidden sm:block" style="font-family:'Space Grotesk',sans-serif">Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan</p>
+        </div>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -149,13 +157,14 @@ const ehPortal = {
           </div>
         </div>
       </div>
-      <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200">
-        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-          <span class="text-white text-xs font-bold">${(user.name || 'U').charAt(0).toUpperCase()}</span>
+      <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200">
+        <div class="w-8 h-8 flex items-center justify-center flex-shrink-0"
+             style="background:rgb(var(--color-secondary));border-radius:var(--rounded-btn)">
+          <span style="color:rgb(var(--color-primary));font-size:12px;font-weight:800;font-family:'Space Grotesk',sans-serif">${(user.name || 'U').charAt(0).toUpperCase()}</span>
         </div>
         <div class="hidden md:block">
-          <p class="text-xs font-semibold text-slate-700 leading-tight">${user.name || 'Pengguna'}</p>
-          <p class="text-[11px] text-slate-400">${user.role || 'Staff'}</p>
+          <p style="font-size:12px;font-weight:700;color:rgb(var(--color-primary));line-height:1.2;font-family:'Space Grotesk',sans-serif">${user.name || 'Pengguna'}</p>
+          <p style="font-size:10px;color:#9ca3af;font-family:'Space Grotesk',sans-serif">${user.role || 'Staff'}</p>
         </div>
       </div>
     </div>`;
