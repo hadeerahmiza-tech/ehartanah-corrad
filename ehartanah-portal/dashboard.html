@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – e-Hartanah Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 font-sans">
+
+<!-- Mobile sidebar overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+           -translate-x-full transition-transform duration-300
+           lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0">
+  </aside>
+
+  <!-- ── Main area ───────────────────────────────────────── -->
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+
+    <!-- Topbar -->
+    <header id="topbar"
+      class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 gap-4">
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-y-auto bg-slate-100">
+      <div class="p-4 lg:p-6 max-w-screen-2xl mx-auto space-y-6">
+
+        <!-- ── Metric Cards ─────────────────────────────── -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+
+          <!-- Total Assets -->
+          <div id="metric-assets" class="stat-card col-span-1">
+            <div class="stat-icon bg-blue-100">
+              <svg class="w-6 h-6 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="stat-label">Jumlah Aset</p>
+              <p class="stat-value">–</p>
+              <p class="stat-sub">–</p>
+            </div>
+          </div>
+
+          <!-- Occupancy -->
+          <div id="metric-occupancy" class="stat-card col-span-1">
+            <div class="stat-icon bg-emerald-100">
+              <svg class="w-6 h-6 text-emerald-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181"/>
+              </svg>
+            </div>
+            <div>
+              <p class="stat-label">Kadar Penghunian</p>
+              <p class="stat-value">–</p>
+              <p class="stat-sub">–</p>
+            </div>
+          </div>
+
+          <!-- Rental Income -->
+          <div id="metric-rental" class="stat-card col-span-1">
+            <div class="stat-icon bg-amber-100">
+              <svg class="w-6 h-6 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="stat-label">Pendapatan Sewa</p>
+              <p class="stat-value text-xl">–</p>
+              <p class="stat-sub">–</p>
+            </div>
+          </div>
+
+          <!-- Maintenance Cost -->
+          <div id="metric-maintenance" class="stat-card col-span-1">
+            <div class="stat-icon bg-red-100">
+              <svg class="w-6 h-6 text-red-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="stat-label">Kos Penyelenggaraan</p>
+              <p class="stat-value text-xl">–</p>
+              <p class="stat-sub">–</p>
+            </div>
+          </div>
+
+          <!-- Upcoming Valuation -->
+          <div id="metric-valuation" class="stat-card col-span-1">
+            <div class="stat-icon bg-purple-100">
+              <svg class="w-6 h-6 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+              </svg>
+            </div>
+            <div>
+              <p class="stat-label">Penilaian Akan Datang</p>
+              <p class="stat-value">–</p>
+              <p class="stat-sub">–</p>
+            </div>
+          </div>
+
+        </div>
+        <!-- /metric cards -->
+
+        <!-- ── Charts row 1 ─────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          <!-- Asset by Type -->
+          <div class="section-card lg:col-span-2">
+            <div class="section-header">
+              <h3 class="section-title">Taburan Aset Mengikut Jenis</h3>
+              <a href="assets.html" class="text-xs text-blue-600 font-semibold hover:underline">Lihat semua &rarr;</a>
+            </div>
+            <div class="p-4">
+              <div class="h-52">
+                <canvas id="chart-asset-type"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Occupancy Doughnut -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Status Penghunian</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-52">
+                <canvas id="chart-occupancy"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Charts row 2 ─────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- Rental Trend -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Trend Pendapatan Sewa (12 Bulan)</h3>
+              <a href="leasing.html" class="text-xs text-blue-600 font-semibold hover:underline">Butiran &rarr;</a>
+            </div>
+            <div class="p-4">
+              <div class="h-48">
+                <canvas id="chart-rental-trend"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maintenance Cost -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Kos Penyelenggaraan (12 Bulan)</h3>
+              <a href="maintenance.html" class="text-xs text-blue-600 font-semibold hover:underline">Butiran &rarr;</a>
+            </div>
+            <div class="p-4">
+              <div class="h-48">
+                <canvas id="chart-mnt-cost"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Tables row ────────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- Recent Tenancy -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Penyewa Semasa</h3>
+              <a href="leasing.html" class="text-xs text-blue-600 font-semibold hover:underline">Semua &rarr;</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Penyewa</th>
+                    <th>Aset</th>
+                    <th>Sewa/Bulan</th>
+                    <th>Tamat</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-tenancy-body">
+                  <tr><td colspan="5" class="py-6 text-center text-slate-400">Memuatkan...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Maintenance -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Kerja Penyelenggaraan Terkini</h3>
+              <a href="maintenance.html" class="text-xs text-blue-600 font-semibold hover:underline">Semua &rarr;</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Aset</th>
+                    <th>Keutamaan</th>
+                    <th>Status</th>
+                    <th>Tarikh</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-mnt-body">
+                  <tr><td colspan="5" class="py-6 text-center text-slate-400">Memuatkan...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div><!-- /main -->
+</div><!-- /flex wrapper -->
+
+<script src="mock-data/data.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  ehPortal.init({ page: 'dashboard', title: 'Dashboard' });
+</script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

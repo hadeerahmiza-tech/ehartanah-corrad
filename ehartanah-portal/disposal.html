@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pelupusan Aset – e-Hartanah Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .stage-step { transition: all 0.2s; }
+    .stage-step.done { opacity: 1; }
+    .stage-step.pending-step { opacity: 0.35; }
+    .connector { flex: 1; height: 2px; }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans">
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+           -translate-x-full transition-transform duration-300
+           lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0"></aside>
+
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <header id="topbar"
+      class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 gap-4"></header>
+
+    <main class="flex-1 overflow-y-auto bg-slate-100">
+      <div class="p-4 lg:p-6 max-w-screen-2xl mx-auto space-y-5">
+
+        <!-- ── Summary ───────────────────────────────────── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="dis-summary"></div>
+
+        <!-- ── Workflow Diagram (Mermaid) ────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Aliran Kerja Pelupusan Aset</h3>
+            <span class="badge badge-blue text-[10px]">Carta Alir Proses</span>
+          </div>
+          <div class="p-6">
+            <div class="mermaid text-sm" id="workflow-diagram">
+flowchart LR
+  A([🏛️ Permohonan\nPelupusan]) -->|Hantar borang| B[📋 Semakan\nUnit Hartanah]
+  B -->|Lulus semakan| C[📊 Penilaian\nAset]
+  B -->|Tidak lulus| R([↩️ Dikembalikan])
+  C -->|Nilai disahkan| D[🗳️ Kelulusan\nJawatankuasa]
+  C -->|Dokumen kurang| R
+  D -->|Diluluskan| E[🏦 Kelulusan\nPerbendaharaan]
+  D -->|Ditolak| R
+  E -->|Diluluskan| F([✅ Pelupusan\nDilaksanakan])
+  E -->|Ditolak| R
+
+  style A fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+  style B fill:#f0fdf4,stroke:#22c55e,color:#15803d
+  style C fill:#fffbeb,stroke:#f59e0b,color:#92400e
+  style D fill:#fdf4ff,stroke:#a855f7,color:#7e22ce
+  style E fill:#fff7ed,stroke:#f97316,color:#9a3412
+  style F fill:#dcfce7,stroke:#16a34a,color:#15803d,font-weight:bold
+  style R fill:#fee2e2,stroke:#ef4444,color:#991b1b
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Disposal Requests ─────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Permohonan Pelupusan</h3>
+            <button onclick="exportDisposalCSV()" class="btn btn-secondary btn-sm">
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Aset</th>
+                  <th>Jenis Pelupusan</th>
+                  <th>Nilai Anggaran</th>
+                  <th>Tarikh Hantar</th>
+                  <th>Peringkat Semasa</th>
+                  <th>Status Kelulusan</th>
+                </tr>
+              </thead>
+              <tbody id="dis-tbody">
+                <tr><td colspan="7" class="py-12 text-center text-slate-400">Memuatkan...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── Approval Tracker ──────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Penjejak Kelulusan</h3>
+          </div>
+          <div class="p-4 space-y-6" id="approval-tracker"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="mock-data/data.js"></script>
+<script src="js/nav.js"></script>
+<script>ehPortal.init({ page: 'disposal', title: 'Pelupusan Aset' });</script>
+<script>
+'use strict';
+
+mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis' } });
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderDisposalSummary();
+  renderDisposalTable();
+  renderApprovalTracker();
+});
+
+function renderDisposalSummary() {
+  const data = window.mockDisposals || [];
+  const total    = data.length;
+  const pending  = data.filter(d => d.stage !== 'Selesai').length;
+  const completed = data.filter(d => d.stage === 'Selesai').length;
+  const totalVal = data.reduce((s,d) => s + d.estimatedValue, 0);
+
+  document.getElementById('dis-summary').innerHTML = [
+    { label:'Jumlah Permohonan', value: total,           icon:'bg-blue-100',   colour:'text-blue-700' },
+    { label:'Dalam Proses',      value: pending,         icon:'bg-amber-100',  colour:'text-amber-700' },
+    { label:'Selesai',           value: completed,       icon:'bg-emerald-100',colour:'text-emerald-700' },
+    { label:'Nilai Keseluruhan', value: formatRM(totalVal), icon:'bg-purple-100', colour:'text-purple-700' },
+  ].map(c => `
+  <div class="stat-card">
+    <div class="stat-icon ${c.icon}">
+      <svg class="w-6 h-6 ${c.colour}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+      </svg>
+    </div>
+    <div><p class="stat-label">${c.label}</p><p class="stat-value text-xl">${c.value}</p></div>
+  </div>`).join('');
+}
+
+function renderDisposalTable() {
+  const stageMap = {
+    'Semakan Unit Hartanah': '<span class="badge badge-blue">Semakan Unit Hartanah</span>',
+    'Penilaian Aset':        '<span class="badge badge-yellow">Penilaian Aset</span>',
+    'Kelulusan Jawatankuasa':'<span class="badge badge-purple">Kelulusan Jawatankuasa</span>',
+    'Perbendaharaan':        '<span class="badge badge-orange">Perbendaharaan</span>',
+    'Selesai':               '<span class="badge badge-green">Selesai</span>',
+  };
+
+  document.getElementById('dis-tbody').innerHTML = (window.mockDisposals||[]).map(d => {
+    const approvals = d.approvals;
+    const doneCount = Object.values(approvals).filter(Boolean).length;
+    const totalSteps = Object.keys(approvals).length;
+    const pct = Math.round((doneCount / totalSteps) * 100);
+
+    return `
+    <tr>
+      <td><span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded">${d.id}</span></td>
+      <td>
+        <p class="font-semibold text-slate-800 text-sm">${d.assetName}</p>
+        <span class="font-mono text-[10px] text-slate-400">${d.assetId}</span>
+      </td>
+      <td><span class="badge badge-teal text-[10px]">${d.disposalType}</span></td>
+      <td class="font-semibold text-slate-700">${formatRM(d.estimatedValue)}</td>
+      <td class="text-sm text-slate-500">${formatDate(d.submittedDate)}</td>
+      <td>${stageMap[d.stage] || `<span class="badge badge-gray">${d.stage}</span>`}</td>
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="progress-bar w-20"><div class="progress-fill ${pct===100?'bg-emerald-500':pct>=75?'bg-blue-500':'bg-amber-500'}" style="width:${pct}%"></div></div>
+          <span class="text-xs font-semibold text-slate-600">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderApprovalTracker() {
+  const stages = [
+    { key:'unitHartanah', label:'Unit Hartanah', desc:'Semakan dokumen & kelayakan' },
+    { key:'penilaian',    label:'Penilaian Aset',desc:'Penilaian pasaran oleh penilai bertauliah' },
+    { key:'jawatankuasa', label:'Jawatankuasa',   desc:'Kelulusan Jawatankuasa Harta' },
+    { key:'perbendaharaan',label:'Perbendaharaan',desc:'Kelulusan Kementerian Kewangan' },
+  ];
+
+  document.getElementById('approval-tracker').innerHTML = (window.mockDisposals||[]).map(d => `
+  <div class="border border-slate-100 rounded-xl p-4">
+    <div class="flex items-start justify-between gap-4 mb-4 flex-wrap">
+      <div>
+        <h4 class="font-bold text-slate-800 text-sm">${d.assetName}</h4>
+        <p class="text-xs text-slate-400">${d.id} · ${d.disposalType}</p>
+      </div>
+      <p class="text-xs text-slate-500 flex-shrink-0">Diserahkan: ${formatDate(d.submittedDate)}</p>
+    </div>
+    <div class="flex items-center gap-1 overflow-x-auto pb-1">
+      ${stages.map((stage, i) => {
+        const done = d.approvals[stage.key];
+        const isLast = i === stages.length - 1;
+        return `
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <div class="flex flex-col items-center gap-1 stage-step ${done ? 'done' : 'pending-step'}">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm
+              ${done ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'}">
+              ${done ? '✓' : (i + 1)}
+            </div>
+            <div class="text-center w-20">
+              <p class="text-[10px] font-semibold text-slate-700 leading-tight">${stage.label}</p>
+              <p class="text-[9px] text-slate-400 leading-tight">${stage.desc}</p>
+            </div>
+          </div>
+          ${!isLast ? `<div class="connector mb-5 ${done ? 'bg-emerald-400' : 'bg-slate-200'}"></div>` : ''}
+        </div>`;
+      }).join('')}
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <div class="connector mb-5 ${d.stage === 'Selesai' ? 'bg-emerald-400' : 'bg-slate-200'}"></div>
+        <div class="flex flex-col items-center gap-1 ${d.stage === 'Selesai' ? 'done' : 'pending-step'}">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm
+            ${d.stage === 'Selesai' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400'}">
+            🏛️
+          </div>
+          <div class="text-center w-20">
+            <p class="text-[10px] font-semibold text-slate-700">Selesai</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${d.reason ? `<div class="mt-3 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2"><span class="font-semibold">Sebab pelupusan:</span> ${d.reason}</div>` : ''}
+  </div>`).join('');
+}
+
+function exportDisposalCSV() {
+  const data = window.mockDisposals || [];
+  const headers = ['ID','Aset','Jenis Pelupusan','Nilai Anggaran','Peringkat','Tarikh Hantar','Sebab'];
+  const rows = data.map(d =>
+    [d.id,`"${d.assetName}"`,d.disposalType,d.estimatedValue,d.stage,d.submittedDate,`"${d.reason}"`].join(',')
+  );
+  const csv = [headers.join(','),...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`pelupusan-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

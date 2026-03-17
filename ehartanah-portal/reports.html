@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan & Analitik – e-Hartanah Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 font-sans">
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+           -translate-x-full transition-transform duration-300
+           lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0"></aside>
+
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <header id="topbar"
+      class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 gap-4"></header>
+
+    <main class="flex-1 overflow-y-auto bg-slate-100">
+      <div class="p-4 lg:p-6 max-w-screen-2xl mx-auto space-y-5">
+
+        <!-- ── Export Panel ───────────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <h3 class="section-title">Eksport Laporan</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Muat turun laporan dalam format pilihan anda</p>
+            </div>
+          </div>
+          <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+            <button onclick="exportReport('pdf','aset')" class="group flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-red-400 hover:bg-red-50 transition-all">
+              <div class="w-10 h-10 bg-red-100 group-hover:bg-red-500 rounded-xl flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 text-red-500 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-semibold text-slate-700">Laporan Aset (PDF)</p>
+                <p class="text-xs text-slate-400">Senarai lengkap aset persekutuan</p>
+              </div>
+            </button>
+
+            <button onclick="exportReport('excel','pajakan')" class="group flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 transition-all">
+              <div class="w-10 h-10 bg-emerald-100 group-hover:bg-emerald-500 rounded-xl flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75.125v-1.5c0-.621.504-1.125 1.125-1.125M3.375 19.5H21M3.375 16.5c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125v1.5H3.375v-1.5Zm0 0V9.75"/></svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-semibold text-slate-700">Laporan Pajakan (Excel)</p>
+                <p class="text-xs text-slate-400">Data penyewa & kadar sewa</p>
+              </div>
+            </button>
+
+            <button onclick="exportReport('pdf','penyelenggaraan')" class="group flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-orange-400 hover:bg-orange-50 transition-all">
+              <div class="w-10 h-10 bg-orange-100 group-hover:bg-orange-500 rounded-xl flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 text-orange-500 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877"/></svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-semibold text-slate-700">Laporan Penyelenggaraan</p>
+                <p class="text-xs text-slate-400">Kos & jadual penyelenggaraan</p>
+              </div>
+            </button>
+
+            <button onclick="exportReport('pdf','penilaian')" class="group flex flex-col items-center gap-3 p-4 rounded-xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all">
+              <div class="w-10 h-10 bg-blue-100 group-hover:bg-blue-500 rounded-xl flex items-center justify-center transition-colors">
+                <svg class="w-5 h-5 text-blue-500 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25"/></svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-semibold text-slate-700">Laporan Penilaian (PDF)</p>
+                <p class="text-xs text-slate-400">Nilai pasaran & jadual penilaian</p>
+              </div>
+            </button>
+
+          </div>
+          <!-- Export progress bar -->
+          <div id="export-progress" class="hidden px-4 pb-4">
+            <div class="alert alert-info flex items-center gap-3">
+              <svg class="w-4 h-4 animate-spin flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              <span id="export-msg" class="text-sm">Menjana laporan...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Charts Row 1 ───────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- Asset Distribution Pie -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Taburan Aset Mengikut Jenis</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-64">
+                <canvas id="chart-asset-dist"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asset by State Bar -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Bilangan Aset Mengikut Negeri</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-64">
+                <canvas id="chart-asset-state"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Charts Row 2 ───────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- Rental Income Bar -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Trend Pendapatan Sewa Bulanan</h3>
+              <span class="text-xs text-slate-400">12 bulan lepas</span>
+            </div>
+            <div class="p-4">
+              <div class="h-60">
+                <canvas id="chart-report-rental"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maintenance Cost Line -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Trend Kos Penyelenggaraan</h3>
+              <span class="text-xs text-slate-400">12 bulan lepas</span>
+            </div>
+            <div class="p-4">
+              <div class="h-60">
+                <canvas id="chart-report-mnt"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Charts Row 3 ───────────────────────────────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          <!-- Occupancy Status -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Status Penghunian</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-48">
+                <canvas id="chart-report-occupancy"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maintenance by Category -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Kos Penyelenggaraan Mengikut Kategori</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-48">
+                <canvas id="chart-mnt-category"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tenant Type Distribution -->
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">Taburan Jenis Penyewa</h3>
+            </div>
+            <div class="p-4">
+              <div class="h-48">
+                <canvas id="chart-tenant-type"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── KPI Summary Table ─────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Ringkasan KPI Pengurusan Hartanah</h3>
+            <span class="badge badge-green">Dikemaskini: Feb 2024</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table" id="kpi-table"></table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="mock-data/data.js"></script>
+<script src="js/nav.js"></script>
+<script>ehPortal.init({ page: 'reports', title: 'Laporan & Analitik' });</script>
+<script>
+'use strict';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderAllCharts();
+  renderKPITable();
+});
+
+const PALETTE = ['#1d4ed8','#16a34a','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+
+function renderAllCharts() {
+  /* 1 – Asset distribution (doughnut) */
+  const assets = window.mockAssets || [];
+  const assetTypeCounts = {};
+  assets.forEach(a => { assetTypeCounts[a.type] = (assetTypeCounts[a.type]||0) + 1; });
+  new Chart(document.getElementById('chart-asset-dist'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(assetTypeCounts),
+      datasets: [{ data: Object.values(assetTypeCounts), backgroundColor: PALETTE, borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins: { legend: { position:'right', labels:{ usePointStyle:true, padding:12, font:{size:11} } } } }
+  });
+
+  /* 2 – Asset by state (horizontal bar) */
+  const stateCounts = {};
+  assets.forEach(a => { stateCounts[a.state] = (stateCounts[a.state]||0) + 1; });
+  const sortedStates = Object.entries(stateCounts).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('chart-asset-state'), {
+    type: 'bar',
+    data: {
+      labels: sortedStates.map(x=>x[0]),
+      datasets: [{ data: sortedStates.map(x=>x[1]), backgroundColor:'#1d4ed8', borderRadius:5, borderSkipped:false }]
+    },
+    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,grid:{color:'#f1f5f9'},ticks:{stepSize:1}},y:{grid:{display:false}}} }
+  });
+
+  /* 3 – Rental income trend (grouped bar) */
+  const trend = window.mockRentalTrend || { labels:[], data:[] };
+  new Chart(document.getElementById('chart-report-rental'), {
+    type: 'bar',
+    data: {
+      labels: trend.labels,
+      datasets: [{
+        label:'Pendapatan Sewa (RM)', data: trend.data,
+        backgroundColor: trend.data.map((v,i)=>i===trend.data.length-1?'#16a34a':'rgba(29,78,216,.6)'),
+        borderRadius:5, borderSkipped:false
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{ y:{ beginAtZero:false, grid:{color:'#f1f5f9'}, ticks:{callback:v=>'RM'+(v/1000).toFixed(0)+'k'} }, x:{grid:{display:false}} } }
+  });
+
+  /* 4 – Maintenance cost line */
+  const mntTrend = window.mockMaintenanceTrend || { labels:[], data:[] };
+  new Chart(document.getElementById('chart-report-mnt'), {
+    type: 'line',
+    data: {
+      labels: mntTrend.labels,
+      datasets: [{
+        label:'Kos (RM)', data: mntTrend.data,
+        borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.08)',
+        fill:true, tension:0.4, pointBackgroundColor:'#ef4444', pointRadius:4
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{ y:{ beginAtZero:true, grid:{color:'#f1f5f9'}, ticks:{callback:v=>'RM'+(v/1000).toFixed(0)+'k'} }, x:{grid:{display:false}} } }
+  });
+
+  /* 5 – Occupancy doughnut */
+  const tenancy = window.mockTenancy||[];
+  const occupied = new Set(tenancy.filter(t=>t.status==='Aktif').map(t=>t.assetId)).size;
+  const maint = assets.filter(a=>a.status==='Penyelenggaraan').length;
+  const vacant = Math.max(assets.length-occupied-maint,0);
+  new Chart(document.getElementById('chart-report-occupancy'), {
+    type:'doughnut',
+    data:{ labels:['Berpenghuni','Penyelenggaraan','Kosong'],
+      datasets:[{data:[occupied,maint,vacant], backgroundColor:['#16a34a','#f59e0b','#e2e8f0'], borderWidth:0, hoverOffset:4}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{legend:{position:'bottom', labels:{usePointStyle:true,pointStyleWidth:8,padding:12,font:{size:10}}}} }
+  });
+
+  /* 6 – Maintenance cost by category */
+  const mntData = window.mockMaintenance||[];
+  const catCosts = {};
+  mntData.forEach(m=>{ catCosts[m.category]=(catCosts[m.category]||0)+m.estimatedCost; });
+  new Chart(document.getElementById('chart-mnt-category'), {
+    type:'doughnut',
+    data:{ labels:Object.keys(catCosts),
+      datasets:[{data:Object.values(catCosts), backgroundColor:PALETTE, borderWidth:0, hoverOffset:4}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{legend:{position:'bottom', labels:{usePointStyle:true,pointStyleWidth:8,padding:10,font:{size:10}}}} }
+  });
+
+  /* 7 – Tenant type distribution */
+  const tenantTypes = {};
+  tenancy.forEach(t=>{ tenantTypes[t.tenantType]=(tenantTypes[t.tenantType]||0)+1; });
+  new Chart(document.getElementById('chart-tenant-type'), {
+    type:'doughnut',
+    data:{ labels:Object.keys(tenantTypes),
+      datasets:[{data:Object.values(tenantTypes), backgroundColor:PALETTE.slice(1), borderWidth:0, hoverOffset:4}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{legend:{position:'bottom', labels:{usePointStyle:true,pointStyleWidth:8,padding:10,font:{size:10}}}} }
+  });
+}
+
+function renderKPITable() {
+  const assets    = window.mockAssets||[];
+  const tenancy   = window.mockTenancy||[];
+  const mnt       = window.mockMaintenance||[];
+  const val       = window.mockValuations||[];
+
+  const occupiedIds = new Set(tenancy.filter(t=>t.status==='Aktif').map(t=>t.assetId));
+  const monthlyRental = tenancy.filter(t=>t.status==='Aktif').reduce((s,t)=>s+t.rentalRate,0);
+  const totalVal = val.reduce((s,v)=>s+v.marketValue,0);
+  const mntCost = mnt.filter(m=>m.status!=='Selesai').reduce((s,m)=>s+m.estimatedCost,0);
+  const overdueVal = val.filter(v=>daysUntil(v.nextDue)<0).length;
+  const expiring = tenancy.filter(t=>t.status==='Hampir Tamat').length;
+  const critMnt = mnt.filter(m=>m.priority==='Kritikal'&&m.status!=='Selesai').length;
+
+  const kpis = [
+    { kpi:'Jumlah Aset Persekutuan',     nilai:assets.length,                 unit:'Aset',   status:'info',    target:'–' },
+    { kpi:'Kadar Penghunian',            nilai:`${Math.round(occupiedIds.size/assets.length*100)}%`, unit:'%', status:'success', target:'≥ 80%' },
+    { kpi:'Pendapatan Sewa Bulanan',     nilai:formatRM(monthlyRental),       unit:'RM',     status:'success', target:'RM 250,000+' },
+    { kpi:'Nilai Keseluruhan Portfolio', nilai:formatRM(totalVal),            unit:'RM',     status:'info',    target:'–' },
+    { kpi:'Kos Penyelenggaraan Tertunggak',nilai:formatRM(mntCost),          unit:'RM',     status: mntCost>100000?'danger':'warning', target:'< RM 100,000' },
+    { kpi:'Penilaian Tamat Tempoh',      nilai:overdueVal,                    unit:'Rekod',  status:overdueVal>0?'danger':'success', target:'0' },
+    { kpi:'Pajakan Hampir Tamat',        nilai:expiring,                      unit:'Rekod',  status:expiring>0?'warning':'success', target:'0' },
+    { kpi:'Kerja Penyelenggaraan Kritikal',nilai:critMnt,                     unit:'Kerja',  status:critMnt>0?'danger':'success', target:'0' },
+  ];
+
+  const statusLabel = { info:'badge-blue', success:'badge-green', warning:'badge-yellow', danger:'badge-red' };
+  const statusText  = { info:'Maklumat', success:'Baik', warning:'Perhatian', danger:'Kritikal' };
+
+  document.getElementById('kpi-table').innerHTML = `
+  <thead><tr><th>#</th><th>KPI</th><th>Nilai Semasa</th><th>Sasaran</th><th>Status</th></tr></thead>
+  <tbody>${kpis.map((k,i)=>`
+  <tr>
+    <td class="text-slate-400 text-xs">${i+1}</td>
+    <td class="font-medium text-slate-800">${k.kpi}</td>
+    <td class="font-bold text-slate-900">${k.nilai}</td>
+    <td class="text-slate-500 text-sm">${k.target}</td>
+    <td><span class="badge ${statusLabel[k.status]}">${statusText[k.status]}</span></td>
+  </tr>`).join('')}</tbody>`;
+}
+
+function exportReport(format, type) {
+  const progress = document.getElementById('export-progress');
+  const msg = document.getElementById('export-msg');
+  progress.classList.remove('hidden');
+  msg.textContent = `Menjana laporan ${type} dalam format ${format.toUpperCase()}...`;
+
+  setTimeout(() => {
+    if (format === 'excel') {
+      // Simulate CSV download
+      const headers = Object.keys(window.mockAssets[0]).join(',');
+      const rows = (window.mockAssets||[]).map(a=>Object.values(a).map(v=>`"${v}"`).join(','));
+      const csv = [headers,...rows].join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download=`laporan-${type}-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+    msg.textContent = `✅ Laporan ${type} (${format.toUpperCase()}) berjaya dijana dan dimuat turun.`;
+    setTimeout(()=>progress.classList.add('hidden'), 3000);
+  }, 1800);
+}
+</script>
+</body>
+</html>

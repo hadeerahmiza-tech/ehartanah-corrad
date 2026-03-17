@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pajakan & Penyewaan – e-Hartanah Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 font-sans">
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+           -translate-x-full transition-transform duration-300
+           lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0"></aside>
+
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <header id="topbar"
+      class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 gap-4"></header>
+
+    <main class="flex-1 overflow-y-auto bg-slate-100">
+      <div class="p-4 lg:p-6 max-w-screen-2xl mx-auto space-y-5">
+
+        <!-- ── Summary cards ─────────────────────────────── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="leasing-summary"></div>
+
+        <!-- ── Alert: expiring leases ───────────────────── -->
+        <div id="expiry-alert" class="hidden alert alert-warning">
+          <strong>Perhatian:</strong> Terdapat perjanjian pajakan yang hampir tamat tempoh dalam 90 hari.
+          Sila semak dan lakukan pembaharuan segera.
+        </div>
+
+        <!-- ── Filter & search ───────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Carian Penyewa</h3>
+            <button onclick="clearLeasingFilters()" class="btn btn-secondary btn-sm">Tetapkan Semula</button>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3">
+            <div class="flex-1 min-w-48">
+              <label class="form-label">Cari Penyewa / Aset</label>
+              <input id="search-tenant" type="text" class="form-input" placeholder="Nama penyewa atau aset...">
+            </div>
+            <div class="w-44">
+              <label class="form-label">Status</label>
+              <select id="filter-lease-status" class="form-input">
+                <option value="">Semua Status</option>
+                <option>Aktif</option>
+                <option>Hampir Tamat</option>
+                <option>Tamat Tempoh</option>
+              </select>
+            </div>
+            <div class="w-44">
+              <label class="form-label">Jenis Penyewa</label>
+              <select id="filter-tenant-type" class="form-input">
+                <option value="">Semua Jenis</option>
+                <option>Agensi Kerajaan</option>
+                <option>Badan Berkanun</option>
+                <option>Syarikat Swasta</option>
+                <option>GLC</option>
+                <option>Individu</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tenant Table ──────────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <h3 class="section-title">Senarai Penyewa</h3>
+              <p id="leasing-count" class="text-xs text-slate-400 mt-0.5"></p>
+            </div>
+            <button onclick="exportLeasingCSV()" class="btn btn-secondary btn-sm no-print">
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Penyewa</th>
+                  <th>Jenis</th>
+                  <th>Aset / Unit</th>
+                  <th>Kadar Sewa</th>
+                  <th>Mula Pajakan</th>
+                  <th>Tamat Pajakan</th>
+                  <th>Baki Hari</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="leasing-tbody">
+                <tr><td colspan="9" class="py-12 text-center text-slate-400">Memuatkan...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── Lease timeline ────────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Garis Masa Tamat Pajakan</h3>
+          </div>
+          <div class="p-6">
+            <div id="lease-timeline" class="space-y-4"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="mock-data/data.js"></script>
+<script src="js/nav.js"></script>
+<script>ehPortal.init({ page: 'leasing', title: 'Pajakan & Penyewaan' });</script>
+<script>
+'use strict';
+let filteredLeases = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  filteredLeases = [...(window.mockTenancy || [])];
+  renderSummary();
+  renderTable();
+  renderTimeline();
+  setupFilters();
+  checkExpiryAlert();
+});
+
+function renderSummary() {
+  const data = window.mockTenancy || [];
+  const active = data.filter(t => t.status === 'Aktif').length;
+  const expiring = data.filter(t => t.status === 'Hampir Tamat').length;
+  const expired = data.filter(t => t.status === 'Tamat Tempoh').length;
+  const totalRental = data.filter(t => t.status === 'Aktif').reduce((s,t) => s+t.rentalRate, 0);
+
+  const cards = [
+    { label:'Pajakan Aktif',      value: active,              icon:'bg-emerald-100', colour:'text-emerald-700' },
+    { label:'Hampir Tamat',       value: expiring,            icon:'bg-amber-100',   colour:'text-amber-700' },
+    { label:'Sudah Tamat',        value: expired,             icon:'bg-red-100',     colour:'text-red-700' },
+    { label:'Pendapatan Bulanan', value: formatRM(totalRental),icon:'bg-blue-100',   colour:'text-blue-700' },
+  ];
+
+  document.getElementById('leasing-summary').innerHTML = cards.map(c => `
+  <div class="stat-card">
+    <div class="stat-icon ${c.icon}">
+      <svg class="w-6 h-6 ${c.colour}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25"/>
+      </svg>
+    </div>
+    <div><p class="stat-label">${c.label}</p><p class="stat-value text-xl">${c.value}</p></div>
+  </div>`).join('');
+}
+
+function checkExpiryAlert() {
+  const expiring = (window.mockTenancy||[]).filter(t => t.status==='Hampir Tamat').length;
+  if (expiring > 0) document.getElementById('expiry-alert').classList.remove('hidden');
+}
+
+function renderTable() {
+  const tbody = document.getElementById('leasing-tbody');
+  const count = document.getElementById('leasing-count');
+  if (count) count.textContent = `${filteredLeases.length} rekod`;
+
+  const statusMap = {
+    'Aktif':        '<span class="badge badge-green">Aktif</span>',
+    'Hampir Tamat': '<span class="badge badge-yellow">Hampir Tamat</span>',
+    'Tamat Tempoh': '<span class="badge badge-red">Tamat Tempoh</span>',
+  };
+
+  tbody.innerHTML = filteredLeases.map(t => {
+    const days = daysUntil(t.leaseExpiry);
+    let daysLabel;
+    if (days < 0) daysLabel = `<span class="text-red-600 font-semibold text-xs">${Math.abs(days)} hari lalu</span>`;
+    else if (days === 0) daysLabel = `<span class="text-red-600 font-bold text-xs">Hari ini!</span>`;
+    else if (days <= 90) daysLabel = `<span class="text-amber-600 font-semibold text-xs">${days} hari lagi</span>`;
+    else daysLabel = `<span class="text-slate-400 text-xs">${days} hari lagi</span>`;
+
+    return `<tr>
+      <td><span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded">${t.id}</span></td>
+      <td>
+        <p class="font-semibold text-slate-800 text-sm">${t.tenantName}</p>
+      </td>
+      <td><span class="badge badge-blue text-[10px]">${t.tenantType}</span></td>
+      <td>
+        <p class="text-sm text-slate-700">${t.assetName}</p>
+        <p class="text-xs text-slate-400">${t.unit}</p>
+      </td>
+      <td class="font-semibold text-slate-800">${t.rentalRate === 0 ? '<span class="text-slate-400">Percuma</span>' : formatRM(t.rentalRate)}</td>
+      <td class="text-sm text-slate-500">${formatDate(t.leaseStart)}</td>
+      <td class="text-sm text-slate-600 font-medium">${formatDate(t.leaseExpiry)}</td>
+      <td>${daysLabel}</td>
+      <td>${statusMap[t.status] || `<span class="badge badge-gray">${t.status}</span>`}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="py-8 text-center text-slate-400">Tiada rekod</td></tr>';
+}
+
+function renderTimeline() {
+  const container = document.getElementById('lease-timeline');
+  const sorted = [...(window.mockTenancy || [])].sort((a,b) => new Date(a.leaseExpiry)-new Date(b.leaseExpiry));
+  const statusColour = { 'Aktif':'bg-emerald-500', 'Hampir Tamat':'bg-amber-500', 'Tamat Tempoh':'bg-red-500' };
+  container.innerHTML = `<div class="timeline">${sorted.map(t => {
+    const days = daysUntil(t.leaseExpiry);
+    const w = Math.max(0, Math.min(100, days > 0 ? (days / 3650 * 100) : 0));
+    return `<div class="timeline-item">
+      <div class="timeline-dot ${statusColour[t.status]||'bg-slate-400'}"></div>
+      <div class="flex items-start gap-4 flex-wrap">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-slate-800">${t.tenantName}</p>
+          <p class="text-xs text-slate-400">${t.assetName} · ${t.unit}</p>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-xs font-semibold text-slate-700">${formatDate(t.leaseExpiry)}</p>
+          <p class="text-[11px] text-slate-400">${days < 0 ? 'Tamat' : days + ' hari lagi'}</p>
+        </div>
+      </div>
+      <div class="progress-bar mt-2 w-full max-w-xs"><div class="progress-fill ${statusColour[t.status]||'bg-slate-400'}" style="width:${w}%"></div></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function setupFilters() {
+  ['search-tenant','filter-lease-status','filter-tenant-type'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', applyFilters);
+  });
+}
+
+function applyFilters() {
+  const q = (document.getElementById('search-tenant')?.value||'').toLowerCase();
+  const status = document.getElementById('filter-lease-status')?.value||'';
+  const type = document.getElementById('filter-tenant-type')?.value||'';
+  filteredLeases = (window.mockTenancy||[]).filter(t =>
+    (!q || t.tenantName.toLowerCase().includes(q) || t.assetName.toLowerCase().includes(q)) &&
+    (!status || t.status === status) &&
+    (!type || t.tenantType === type)
+  );
+  renderTable();
+}
+
+function clearLeasingFilters() {
+  ['search-tenant','filter-lease-status','filter-tenant-type'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value='';
+  });
+  filteredLeases = [...(window.mockTenancy||[])];
+  renderTable();
+}
+
+function exportLeasingCSV() {
+  const headers = ['ID','Penyewa','Jenis','Aset','Unit','Kadar Sewa','Mula','Tamat','Status'];
+  const rows = filteredLeases.map(t =>
+    [t.id,`"${t.tenantName}"`,t.tenantType,`"${t.assetName}"`,`"${t.unit}"`,t.rentalRate,t.leaseStart,t.leaseExpiry,t.status].join(',')
+  );
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`pajakan-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

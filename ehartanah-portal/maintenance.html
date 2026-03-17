@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penyelenggaraan – e-Hartanah Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 font-sans">
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+<div class="flex h-screen overflow-hidden">
+  <aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0d2137] flex flex-col
+           -translate-x-full transition-transform duration-300
+           lg:relative lg:translate-x-0 lg:z-auto flex-shrink-0"></aside>
+
+  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <header id="topbar"
+      class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 flex-shrink-0 gap-4"></header>
+
+    <main class="flex-1 overflow-y-auto bg-slate-100">
+      <div class="p-4 lg:p-6 max-w-screen-2xl mx-auto space-y-5">
+
+        <!-- ── Summary ───────────────────────────────────── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="mnt-summary"></div>
+
+        <!-- ── Tabs ─────────────────────────────────────── -->
+        <div class="flex gap-3 items-center">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('all', this)">Semua</button>
+            <button class="tab-btn" onclick="switchTab('Berjadual', this)">Berjadual</button>
+            <button class="tab-btn" onclick="switchTab('Ad-hoc', this)">Ad-hoc</button>
+          </div>
+          <div class="ml-auto flex gap-2">
+            <select id="filter-mnt-status" class="form-input w-36 text-sm" onchange="renderMaintenance()">
+              <option value="">Semua Status</option>
+              <option>Belum Mula</option>
+              <option>Dalam Proses</option>
+              <option>Selesai</option>
+            </select>
+            <select id="filter-mnt-priority" class="form-input w-36 text-sm" onchange="renderMaintenance()">
+              <option value="">Semua Keutamaan</option>
+              <option>Kritikal</option>
+              <option>Tinggi</option>
+              <option>Sederhana</option>
+              <option>Rendah</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── Maintenance Table ─────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <h3 class="section-title">Rekod Penyelenggaraan</h3>
+              <p id="mnt-count" class="text-xs text-slate-400 mt-0.5"></p>
+            </div>
+            <button onclick="exportMntCSV()" class="btn btn-secondary btn-sm">
+              <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Aset</th>
+                  <th>Jenis</th>
+                  <th>Kategori</th>
+                  <th>Penerangan</th>
+                  <th>Keutamaan</th>
+                  <th>Kontraktor</th>
+                  <th>Kos Anggaran</th>
+                  <th>Tarikh Dijadual</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="mnt-tbody">
+                <tr><td colspan="10" class="py-12 text-center text-slate-400">Memuatkan...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── Kanban Board ──────────────────────────────── -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Papan Kanban Penyelenggaraan</h3>
+          </div>
+          <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4" id="kanban-board"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="mock-data/data.js"></script>
+<script src="js/nav.js"></script>
+<script>ehPortal.init({ page: 'maintenance', title: 'Penyelenggaraan' });</script>
+<script>
+'use strict';
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSummary();
+  renderMaintenance();
+  renderKanban();
+});
+
+function renderSummary() {
+  const data = window.mockMaintenance || [];
+  const total = data.length;
+  const inProgress = data.filter(m => m.status === 'Dalam Proses').length;
+  const critical = data.filter(m => m.priority === 'Kritikal').length;
+  const totalCost = data.filter(m => m.status !== 'Selesai').reduce((s,m) => s + m.estimatedCost, 0);
+
+  document.getElementById('mnt-summary').innerHTML = [
+    { label:'Jumlah Kerja', value: total,            icon:'bg-blue-100',   colour:'text-blue-700' },
+    { label:'Dalam Proses', value: inProgress,        icon:'bg-amber-100',  colour:'text-amber-700' },
+    { label:'Kritikal',     value: critical,          icon:'bg-red-100',    colour:'text-red-700' },
+    { label:'Kos Belum Selesai', value: formatRM(totalCost), icon:'bg-purple-100', colour:'text-purple-700' },
+  ].map(c => `
+  <div class="stat-card">
+    <div class="stat-icon ${c.icon}">
+      <svg class="w-6 h-6 ${c.colour}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877"/>
+      </svg>
+    </div>
+    <div><p class="stat-label">${c.label}</p><p class="stat-value text-xl">${c.value}</p></div>
+  </div>`).join('');
+}
+
+function switchTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMaintenance();
+}
+
+function renderMaintenance() {
+  const status = document.getElementById('filter-mnt-status')?.value || '';
+  const priority = document.getElementById('filter-mnt-priority')?.value || '';
+  let data = window.mockMaintenance || [];
+  if (activeTab !== 'all') data = data.filter(m => m.type === activeTab);
+  if (status) data = data.filter(m => m.status === status);
+  if (priority) data = data.filter(m => m.priority === priority);
+
+  const count = document.getElementById('mnt-count');
+  if (count) count.textContent = `${data.length} rekod`;
+
+  const priorityMap = { Kritikal:'badge-red', Tinggi:'badge-orange', Sederhana:'badge-yellow', Rendah:'badge-gray' };
+  const statusMap   = { 'Selesai':'badge-green', 'Dalam Proses':'badge-blue', 'Belum Mula':'badge-gray' };
+  const typeMap     = { Berjadual:'badge-teal', 'Ad-hoc':'badge-orange' };
+
+  document.getElementById('mnt-tbody').innerHTML = data.map(m => `
+  <tr>
+    <td><span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded">${m.id}</span></td>
+    <td>
+      <p class="text-sm font-semibold text-slate-800">${m.assetName}</p>
+      <span class="font-mono text-[10px] text-slate-400">${m.assetId}</span>
+    </td>
+    <td><span class="badge ${typeMap[m.type]||'badge-gray'} text-[10px]">${m.type}</span></td>
+    <td><span class="badge badge-blue text-[10px]">${m.category}</span></td>
+    <td class="max-w-xs">
+      <p class="text-xs text-slate-600 leading-snug">${m.description}</p>
+    </td>
+    <td><span class="badge ${priorityMap[m.priority]||'badge-gray'}">${m.priority}</span></td>
+    <td class="text-xs text-slate-500">${m.contractor}</td>
+    <td class="text-sm font-semibold text-slate-700">${formatRM(m.estimatedCost)}</td>
+    <td class="text-sm text-slate-500">${formatDate(m.scheduledDate)}</td>
+    <td><span class="badge ${statusMap[m.status]||'badge-gray'}">${m.status}</span></td>
+  </tr>`).join('') || '<tr><td colspan="10" class="py-8 text-center text-slate-400">Tiada rekod</td></tr>';
+}
+
+function renderKanban() {
+  const data = window.mockMaintenance || [];
+  const cols = [
+    { key:'Belum Mula',   label:'Belum Mula',   colour:'border-t-slate-400',  bg:'bg-slate-50'  },
+    { key:'Dalam Proses', label:'Dalam Proses',  colour:'border-t-blue-500',   bg:'bg-blue-50'   },
+    { key:'Selesai',      label:'Selesai',       colour:'border-t-emerald-500',bg:'bg-emerald-50'},
+  ];
+  const priorityMap = { Kritikal:'badge-red', Tinggi:'badge-orange', Sederhana:'badge-yellow', Rendah:'badge-gray' };
+
+  document.getElementById('kanban-board').innerHTML = cols.map(col => {
+    const items = data.filter(m => m.status === col.key);
+    return `
+    <div class="rounded-xl border-t-4 ${col.colour} ${col.bg} p-3 space-y-2">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-bold text-sm text-slate-700">${col.label}</h4>
+        <span class="badge badge-blue">${items.length}</span>
+      </div>
+      ${items.map(m => `
+      <div class="bg-white rounded-lg p-3 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <span class="font-mono text-xs text-blue-700">${m.id}</span>
+          <span class="badge ${priorityMap[m.priority]||'badge-gray'} text-[10px]">${m.priority}</span>
+        </div>
+        <p class="text-xs font-semibold text-slate-800 leading-snug mb-1">${m.assetName}</p>
+        <p class="text-[11px] text-slate-500 leading-snug">${m.description}</p>
+        <div class="flex items-center justify-between mt-2">
+          <span class="badge badge-blue text-[10px]">${m.category}</span>
+          <span class="text-[11px] text-slate-400">${formatDate(m.scheduledDate)}</span>
+        </div>
+      </div>`).join('') || `<p class="text-xs text-slate-400 text-center py-4">Tiada rekod</p>`}
+    </div>`;
+  }).join('');
+}
+
+function exportMntCSV() {
+  const data = window.mockMaintenance || [];
+  const headers = ['ID','Aset','Jenis','Kategori','Keutamaan','Status','Tarikh','Kos Anggaran','Kontraktor'];
+  const rows = data.map(m =>
+    [m.id,`"${m.assetName}"`,m.type,m.category,m.priority,m.status,m.scheduledDate,m.estimatedCost,`"${m.contractor}"`].join(',')
+  );
+  const csv = [headers.join(','),...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`penyelenggaraan-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
