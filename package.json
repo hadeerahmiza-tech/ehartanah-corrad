@@ -1,8 +1,9 @@
 {
   "private": true,
   "scripts": {
+    "dev": "npx serve ehartanah-portal --listen 3100 --no-clipboard",
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev:nuxt": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
