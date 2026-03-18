@@ -7,71 +7,39 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{colors:{primary:({opacityValue:o})=>o!=null?`rgba(var(--color-primary),${o})`:`rgb(var(--color-primary))`,secondary:({opacityValue:o})=>o!=null?`rgba(var(--color-secondary),${o})`:`rgb(var(--color-secondary))`},fontFamily:{sans:["'Space Grotesk'","system-ui","sans-serif"]}}}}</script>
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* Login page — matches corrad primary dark navy */
-    .login-bg {
-      background: linear-gradient(135deg, rgb(13,27,42) 0%, rgb(9,20,34) 55%, rgb(13,27,42) 100%);
-    }
-    .glass-card {
-      background: rgba(255,255,255,0.98);
-    }
-    .pattern-overlay {
-      background-image: radial-gradient(circle at 2px 2px, rgba(97,176,183,0.07) 1px, transparent 0);
-      background-size: 28px 28px;
-    }
-    /* Override Tailwind rounded for corrad .2rem style */
-    .login-input {
-      border-radius: 0.2rem !important;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .login-btn {
-      border-radius: 0.2rem !important;
-      font-family: 'Space Grotesk', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 700;
-    }
-  </style>
 </head>
-<body class="login-bg min-h-screen flex items-center justify-center p-4">
-  <div class="pattern-overlay fixed inset-0 pointer-events-none"></div>
+<body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
-  <!-- Decorative glow — teal to match secondary colour -->
-  <div class="fixed top-0 right-0 w-96 h-96 blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"
-       style="background:rgba(97,176,183,.12);border-radius:50%"></div>
-  <div class="fixed bottom-0 left-0 w-80 h-80 blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2"
-       style="background:rgba(97,176,183,.08);border-radius:50%"></div>
+  <div class="w-full max-w-sm">
 
-  <div class="w-full max-w-md relative z-10">
-
-    <!-- Logo / Brand -->
+    <!-- Logo / Header -->
     <div class="text-center mb-8">
-      <!-- Square logo matching corrad --rounded-btn: 0.2rem -->
-      <div class="inline-flex items-center justify-center w-16 h-16 shadow-2xl mb-4"
-           style="background:rgb(97,176,183);border-radius:0.2rem">
-        <span style="color:rgb(13,27,42);font-weight:900;font-size:22px;letter-spacing:-1px;font-family:'Space Grotesk',sans-serif">eH</span>
+      <div class="inline-flex items-center justify-center w-16 h-16 mb-4 shadow-lg"
+           style="background:rgb(var(--color-primary));border-radius:0.75rem">
+        <span style="color:white;font-weight:900;font-size:22px;letter-spacing:-1px;font-family:'Space Grotesk',sans-serif">eH</span>
       </div>
-      <h1 class="text-3xl font-black text-white" style="font-family:'Space Grotesk',sans-serif;letter-spacing:-0.5px">e-Hartanah</h1>
-      <p class="text-sm mt-1 font-medium" style="color:rgb(97,176,183);font-family:'Space Grotesk',sans-serif">Portal Pengurusan Hartanah Persekutuan</p>
-      <p class="text-xs mt-1" style="color:rgba(97,176,183,.6);font-family:'Space Grotesk',sans-serif">Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan</p>
+      <h1 class="text-2xl font-bold" style="color:rgb(var(--color-primary));font-family:'Space Grotesk',sans-serif">e-Hartanah</h1>
+      <p class="text-sm mt-1" style="color:#6b7280;font-family:'Space Grotesk',sans-serif">Portal Pengurusan Hartanah Persekutuan</p>
+      <p class="text-xs mt-0.5" style="color:#9ca3af;font-family:'Space Grotesk',sans-serif">Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan</p>
     </div>
 
     <!-- Login Card -->
-    <div class="glass-card shadow-2xl overflow-hidden" style="border-radius:0.2rem">
+    <div class="section-card shadow-2xl">
 
-      <!-- Card Header — corrad primary dark stripe -->
-      <div class="px-6 py-4" style="background:rgb(13,27,42)">
-        <h2 class="text-white font-bold text-sm uppercase tracking-widest" style="font-family:'Space Grotesk',sans-serif">Log Masuk Sistem</h2>
-        <p class="text-xs mt-0.5" style="color:rgb(97,176,183);font-family:'Space Grotesk',sans-serif;opacity:.8">Sila masukkan maklumat pengguna anda</p>
+      <!-- Card Header -->
+      <div class="section-header">
+        <h2 class="section-title">Log Masuk Sistem</h2>
       </div>
 
       <!-- Demo notice -->
-      <div class="mx-6 mt-4 alert alert-info text-xs">
-        <strong>Demo Mode:</strong> Masukkan sebarang nama pengguna &amp; kata laluan untuk log masuk.
+      <div class="px-6 pt-5">
+        <div class="alert alert-info text-xs">
+          <strong>Demo Mode:</strong> Masukkan sebarang nama pengguna &amp; kata laluan untuk log masuk.
+        </div>
       </div>
 
       <!-- Form -->
-      <form id="login-form" class="px-6 pb-6 pt-4 space-y-4" onsubmit="handleLogin(event)">
+      <form id="login-form" class="px-6 py-5 space-y-4" onsubmit="handleLogin(event)">
 
         <div>
           <label class="form-label" for="username">Nama Pengguna</label>
@@ -85,7 +53,7 @@
             <input id="password" type="password" class="form-input pr-10" placeholder="Masukkan kata laluan"
               autocomplete="current-password" value="demo1234">
             <button type="button" onclick="togglePassword()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
               <svg id="eye-icon" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
@@ -112,20 +80,30 @@
           Sila lengkapkan semua medan termasuk peranan.
         </div>
 
+        <!-- Dark navy button — matches eATOM neutral/dark button -->
         <button type="submit" id="login-btn"
-          class="w-full btn btn-primary login-btn justify-center py-3 text-sm shadow-lg">
+          class="w-full btn justify-center py-3 text-sm"
+          style="background:rgb(var(--color-primary));color:white;margin-top:8px">
           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
           </svg>
           Log Masuk
         </button>
+
       </form>
+
+      <!-- Card Footer -->
+      <div class="px-6 pb-5 pt-0">
+        <p class="text-xs text-center" style="color:#9ca3af;font-family:'Space Grotesk',sans-serif">
+          POC — Kata laluan sebarang nilai diterima
+        </p>
+      </div>
 
     </div>
 
-    <!-- Footer -->
-    <p class="text-center text-blue-300/60 text-xs mt-6">
-      © 2024 Jabatan Ketua Pengarah Tanah & Galian Persekutuan &nbsp;·&nbsp; Versi 2.4.1
+    <!-- Page Footer -->
+    <p class="text-center text-xs mt-6" style="color:#9ca3af;font-family:'Space Grotesk',sans-serif">
+      © 2024 Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan &nbsp;·&nbsp; Versi 2.4.1
     </p>
 
   </div>
@@ -152,6 +130,7 @@
 
       // Simulate loading
       btn.disabled = true;
+      btn.style.opacity = '0.7';
       btn.innerHTML = `<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Mengesahkan...`;
 
       setTimeout(() => {
