@@ -3,8 +3,6 @@
    Design: corrad-laravel (mfauzzury/corrad-laravel)
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 /* ── Accent color scale (corrad-laravel) ── */
 :root {
   --accent-50:  #f5f3ff;
@@ -63,7 +61,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
@@ -109,7 +107,7 @@ html, body {
   cursor: pointer;
   border: none;
   background: none;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: inherit;
   transition: background var(--animation-btn), color var(--animation-btn);
   white-space: nowrap;
   text-decoration: none;
@@ -181,7 +179,7 @@ html, body {
   width: 100%; padding: 6px 10px; border-radius: 6px;
   border: 1px solid #e2e8f0; font-size: 12px; font-weight: 500;
   color: #475569; cursor: pointer; background: #fff;
-  font-family: 'Space Grotesk', sans-serif; transition: border-color 0.15s;
+  font-family: inherit; transition: border-color 0.15s;
 }
 .theme-btn:hover { border-color: var(--accent-ring); color: #0f172a; }
 .theme-btn.selected { border-color: var(--accent-500); background: var(--accent-50); color: var(--accent-700); }
@@ -193,7 +191,7 @@ html, body {
   border-top: 1px solid #e2e8f0;
   font-size: 12px; font-weight: 500; color: #334155; cursor: pointer;
   padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;
-  margin-top: 10px; background: #fff; font-family: 'Space Grotesk', sans-serif;
+  margin-top: 10px; background: #fff; font-family: inherit;
 }
 .toggle-pill {
   width: 28px; height: 16px; border-radius: 99px; background: #cbd5e1;
@@ -234,7 +232,7 @@ html, body {
   padding: 4px 12px 4px; margin-top: 12px;
   font-size: 11px; font-weight: 700; color: #94a3b8;
   text-transform: uppercase; letter-spacing: 0.08em;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: inherit;
 }
 #sidebar.compact .nav-group-label { display: none; }
 
@@ -291,7 +289,7 @@ html, body {
   width: 100%; padding: 6px 10px; border-radius: var(--rounded-btn);
   border: none; background: none; cursor: pointer;
   font-size: 12px; font-weight: 500; color: #64748b;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: inherit;
   transition: background var(--animation-btn), color var(--animation-btn);
   text-transform: uppercase; letter-spacing: 0.04em;
 }
@@ -317,7 +315,7 @@ html, body {
   display: inline-flex; align-items: center;
   padding: 2px 10px; border-radius: var(--rounded-badge);
   font-size: 11px; font-weight: 600;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: inherit;
   white-space: nowrap; letter-spacing: 0.02em;
 }
 .badge-green  { background: #dcfce7; color: #15803d; }
@@ -383,7 +381,7 @@ html, body {
 .form-input {
   width: 100%; padding: 9px 14px;
   border: 1px solid #d8dee4; border-radius: var(--rounded-btn);
-  font-size: 13px; font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-family: inherit;
   color: #1a1f36; background: #fff; outline: none;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   transition: border-color var(--animation-btn), box-shadow var(--animation-btn);
@@ -396,7 +394,7 @@ html, body {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 9px 18px; border-radius: var(--rounded-btn);
   font-size: 13px; font-weight: 500;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: inherit;
   cursor: pointer; transition: all var(--animation-btn);
   border: none; text-decoration: none; white-space: nowrap;
 }
@@ -412,7 +410,7 @@ html, body {
 
 /* ── Tab bar ───────────────────────────────── */
 .tab-bar { display: flex; gap: 4px; padding: 4px; background: #f8fafc; border-radius: var(--rounded-btn); border: 1px solid #e2e8f0; }
-.tab-btn { padding: 6px 16px; border-radius: var(--rounded-btn); font-size: 12px; font-weight: 600; font-family: 'Space Grotesk', sans-serif; color: #64748b; cursor: pointer; transition: all var(--animation-btn); border: none; background: transparent; }
+.tab-btn { padding: 6px 16px; border-radius: var(--rounded-btn); font-size: 12px; font-weight: 600; font-family: inherit; color: #64748b; cursor: pointer; transition: all var(--animation-btn); border: none; background: transparent; }
 .tab-btn.active { background: var(--accent-600); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
 .tab-btn:hover:not(.active) { color: var(--accent-700); background: var(--accent-50); }
 
