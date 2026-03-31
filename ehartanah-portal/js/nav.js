@@ -1,5 +1,6 @@
 /* ============================================================
    e-Hartanah Portal – Shared Navigation & Auth Utility
+   Design: corrad-laravel (mfauzzury/corrad-laravel)
    ============================================================ */
 'use strict';
 
@@ -8,10 +9,7 @@ const ehPortal = {
   /* ── Auth ───────────────────────────────────────────────── */
   checkAuth() {
     const user = localStorage.getItem('ehUser');
-    if (!user) {
-      window.location.replace('index.html');
-      return null;
-    }
+    if (!user) { window.location.replace('index.html'); return null; }
     try { return JSON.parse(user); }
     catch { localStorage.removeItem('ehUser'); window.location.replace('index.html'); return null; }
   },
@@ -26,7 +24,32 @@ const ehPortal = {
     window.location.replace('index.html');
   },
 
-  /* ── Nav item config ────────────────────────────────────── */
+  /* ── Theme ──────────────────────────────────────────────── */
+  themeChoices: [
+    { value: 'violet',      label: 'Violet',  color: '#8b5cf6' },
+    { value: 'blue',        label: 'Blue',    color: '#3b82f6' },
+    { value: 'green',       label: 'Green',   color: '#22c55e' },
+    { value: 'red',         label: 'Red',     color: '#ef4444' },
+    { value: 'black-white', label: 'B&W',     color: '#1e293b' },
+    { value: 'grey',        label: 'Grey',    color: '#737373' },
+  ],
+
+  getThemeColor() {
+    return localStorage.getItem('ehThemeColor') || 'violet';
+  },
+
+  applyThemeColor(color) {
+    document.documentElement.setAttribute('data-theme-color', color);
+    localStorage.setItem('ehThemeColor', color);
+    // update theme buttons
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.theme === color);
+      const check = btn.querySelector('.theme-check');
+      if (check) check.style.display = btn.dataset.theme === color ? '' : 'none';
+    });
+  },
+
+  /* ── Nav items ──────────────────────────────────────────── */
   navItems: [
     {
       id: 'dashboard', href: 'dashboard.html', label: 'Dashboard',
@@ -58,118 +81,150 @@ const ehPortal = {
     },
   ],
 
-  /* ── Render sidebar HTML ────────────────────────────────── */
+  /* ── Build sidebar ──────────────────────────────────────── */
   buildSidebar(activePage) {
     const user = this.getUser();
+    const initial = (user.name || 'U').charAt(0).toUpperCase();
+
     const items = this.navItems.map(item => `
-      <a href="${item.href}" data-nav="${item.id}"
-         class="nav-link${item.id === activePage ? ' active' : ''}">
+      <a href="${item.href}" class="nav-link${item.id === activePage ? ' active' : ''}">
         ${item.icon}
         <span>${item.label}</span>
+        <span class="nav-tooltip">${item.label}</span>
       </a>`).join('');
 
     return `
-    <!-- Brand header — small dark icon + text on white sidebar (eATOM style) -->
-    <div class="flex items-center gap-3 px-4 h-14 flex-shrink-0"
-         style="border-bottom:1px solid rgb(var(--border-color))">
-      <div class="flex items-center justify-center w-8 h-8 flex-shrink-0"
-           style="background:rgb(var(--color-primary));border-radius:var(--rounded-btn)">
-        <span style="color:white;font-weight:900;font-size:12px;letter-spacing:-0.5px">eH</span>
-      </div>
-      <div class="leading-tight">
-        <p style="font-weight:700;font-size:14px;color:rgb(var(--color-primary));font-family:'Space Grotesk',sans-serif;line-height:1.2">e-Hartanah</p>
-        <p style="color:#6b7280;font-size:10px;font-family:'Space Grotesk',sans-serif;line-height:1.2">Portal Pengurusan</p>
-      </div>
-    </div>
-
-    <nav class="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-      <p style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.1em;padding:4px 12px 8px;font-family:'Space Grotesk',sans-serif">Menu Utama</p>
-      ${items}
-    </nav>
-
-    <div class="px-2 py-3 flex-shrink-0" style="border-top:1px solid rgb(var(--border-color))">
-      <div class="flex items-center gap-2.5 px-3 py-2 rounded mb-1"
-           style="background:rgb(var(--bg-1));border-radius:var(--rounded-btn)">
-        <div class="w-7 h-7 flex items-center justify-center flex-shrink-0"
-             style="background:rgb(var(--color-secondary));border-radius:var(--rounded-btn)">
-          <span style="color:rgb(var(--color-primary));font-size:11px;font-weight:800">${(user.name || 'U').charAt(0).toUpperCase()}</span>
-        </div>
-        <div class="overflow-hidden flex-1 min-w-0">
-          <p style="color:rgb(var(--color-primary));font-weight:600;font-size:12px;font-family:'Space Grotesk',sans-serif;line-height:1.3" class="truncate" id="user-name">${user.name || 'Pengguna'}</p>
-          <p style="color:#6b7280;font-size:10px;font-family:'Space Grotesk',sans-serif" class="truncate" id="user-role">${user.role || 'Staff'}</p>
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">eH</div>
+        <div class="sidebar-logo-text">
+          <p>e-Hartanah</p>
+          <span>Portal Pengurusan</span>
         </div>
       </div>
-      <button data-logout onclick="ehPortal.logout()"
-        class="w-full flex items-center gap-2 px-3 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 text-xs font-medium transition-all uppercase tracking-wider"
-        style="border-radius:var(--rounded-btn);font-family:'Space Grotesk',sans-serif">
-        <svg class="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
-        </svg>
-        Log Keluar
-      </button>
-    </div>`;
+      <nav style="flex:1;overflow-y:auto;padding:10px 8px;">
+        <p class="nav-group-label">Menu Utama</p>
+        ${items}
+      </nav>
+      <div class="sidebar-user">
+        <div class="sidebar-user-inner">
+          <div class="sidebar-user-avatar">${initial}</div>
+          <div style="overflow:hidden;flex:1;min-width:0">
+            <p class="sidebar-user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${user.name || 'Pengguna'}</p>
+            <p class="sidebar-user-role">${user.role || 'Staff'}</p>
+          </div>
+        </div>
+        <button class="sidebar-logout" onclick="ehPortal.logout()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/></svg>
+          <span>Log Keluar</span>
+        </button>
+      </div>`;
   },
 
-  /* ── Render topbar HTML ─────────────────────────────────── */
+  /* ── Build topbar ───────────────────────────────────────── */
   buildTopbar(pageTitle) {
     const user = this.getUser();
+    const initial = (user.name || 'U').charAt(0).toUpperCase();
+    const nameShort = (user.name || 'Pengguna').length > 18
+      ? (user.name || 'Pengguna').slice(0, 18) + '…'
+      : (user.name || 'Pengguna');
     const notifCount = (window.mockNotifications || []).length;
+    const currentTheme = this.getThemeColor();
+
+    const themeButtons = this.themeChoices.map(t => `
+      <button class="theme-btn${t.value === currentTheme ? ' selected' : ''}" data-theme="${t.value}" onclick="ehPortal.applyThemeColor('${t.value}')">
+        <span style="display:flex;align-items:center;gap:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:${t.color};flex-shrink:0"></span>
+          ${t.label}
+        </span>
+        <svg class="theme-check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;color:var(--accent-600);display:${t.value === currentTheme ? '' : 'none'}"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>
+      </button>`).join('');
+
+    const notifItems = (window.mockNotifications || []).map(n => `
+      <a href="${n.link}" style="display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #f1f5f9;transition:background 0.15s;text-decoration:none;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+        <div style="width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${n.type==='danger'?'#ef4444':n.type==='warning'?'#f59e0b':n.type==='success'?'#22c55e':'#3b82f6'}"></div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:12px;color:#334155;line-height:1.4">${n.message}</p>
+          <p style="font-size:11px;color:#94a3b8;margin-top:2px">${n.time}</p>
+        </div>
+      </a>`).join('');
+
     return `
-    <div class="flex items-center gap-3">
-      <button id="menu-btn" class="lg:hidden p-2 hover:bg-slate-100 transition-colors" style="border-radius:var(--rounded-btn)">
-        <svg class="w-5 h-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-        </svg>
-      </button>
-      <!-- Left accent bar matching corrad header style -->
-      <div class="flex items-center gap-2.5">
-        <div class="w-1 h-8 hidden sm:block" style="background:rgb(var(--color-secondary));border-radius:2px"></div>
-        <div>
-          <h1 style="font-size:14px;font-weight:800;color:rgb(var(--color-primary));text-transform:uppercase;letter-spacing:0.05em;line-height:1.2;font-family:'Space Grotesk',sans-serif">${pageTitle}</h1>
-          <p class="text-xs text-slate-400 hidden sm:block" style="font-family:'Space Grotesk',sans-serif">Jabatan Ketua Pengarah Tanah &amp; Galian Persekutuan</p>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <div class="relative">
-        <button onclick="toggleNotifications()" class="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
-          <svg class="w-5 h-5 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
-          </svg>
-          ${notifCount > 0 ? `<span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>` : ''}
+      <!-- Left: shield icon + mobile menu -->
+      <div class="tb-left">
+        <button id="menu-btn" style="display:none;border:none;background:none;cursor:pointer;padding:4px;border-radius:4px;" class="lg-hidden">
+          <svg style="width:18px;height:18px;color:#64748b" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
         </button>
-        <!-- Notification dropdown -->
-        <div id="notif-panel" class="hidden absolute right-0 top-10 w-80 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 overflow-hidden">
-          <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center">
-            <span class="text-sm font-bold text-slate-800">Notifikasi</span>
-            <span class="badge badge-blue text-[10px]">${notifCount} baru</span>
-          </div>
-          <div class="max-h-72 overflow-y-auto">
-            ${(window.mockNotifications || []).map(n => `
-            <a href="${n.link}" class="flex gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 transition-colors">
-              <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.type==='danger'?'bg-red-500':n.type==='warning'?'bg-amber-500':n.type==='success'?'bg-emerald-500':'bg-blue-500'}"></div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs text-slate-700 leading-snug">${n.message}</p>
-                <p class="text-[11px] text-slate-400 mt-0.5">${n.time}</p>
-              </div>
-            </a>`).join('')}
-          </div>
-          <div class="px-4 py-2.5 text-center">
-            <a href="reports.html" class="text-xs font-semibold text-blue-600 hover:underline">Lihat semua aktiviti</a>
-          </div>
+        <div style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,var(--accent-600),var(--accent-500));display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg style="width:11px;height:11px;color:white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
         </div>
       </div>
-      <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200">
-        <div class="w-8 h-8 flex items-center justify-center flex-shrink-0"
-             style="background:rgb(var(--color-secondary));border-radius:var(--rounded-btn)">
-          <span style="color:rgb(var(--color-primary));font-size:12px;font-weight:800;font-family:'Space Grotesk',sans-serif">${(user.name || 'U').charAt(0).toUpperCase()}</span>
+
+      <!-- Right: user + settings + notifications + logout -->
+      <div class="tb-right">
+        <!-- User profile -->
+        <div class="tb-sep"></div>
+        <div class="tb-user">
+          <div class="tb-user-avatar">${initial}</div>
+          <div style="line-height:1">
+            <p class="tb-user-name">${nameShort}</p>
+            <p class="tb-user-role">${user.role || 'Staff'}</p>
+          </div>
+          <span class="tb-tip">Profil</span>
         </div>
-        <div class="hidden md:block">
-          <p style="font-size:12px;font-weight:700;color:rgb(var(--color-primary));line-height:1.2;font-family:'Space Grotesk',sans-serif">${user.name || 'Pengguna'}</p>
-          <p style="font-size:10px;color:#9ca3af;font-family:'Space Grotesk',sans-serif">${user.role || 'Staff'}</p>
+
+        <!-- Settings -->
+        <div class="tb-sep"></div>
+        <div class="tb-settings-wrap">
+          <button class="tb-btn" id="settings-btn" onclick="ehPortal.toggleSettings(event)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            <span class="tb-tip">Tetapan</span>
+          </button>
+          <div id="settings-panel">
+            <p class="panel-label">Warna Tema</p>
+            <div class="theme-grid">${themeButtons}</div>
+          </div>
         </div>
-      </div>
-    </div>`;
+
+        <!-- Notifications -->
+        <div class="tb-sep"></div>
+        <div class="notif-wrap" style="height:40px;display:flex;align-items:stretch;">
+          <button class="tb-btn" id="notif-btn" onclick="ehPortal.toggleNotif(event)" style="position:relative">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+            ${notifCount > 0 ? `<span style="position:absolute;top:6px;right:6px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid white"></span>` : ''}
+            <span class="tb-tip">Notifikasi</span>
+          </button>
+          <div id="notif-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e2e8f0">
+              <span style="font-size:13px;font-weight:700;color:#0f172a">Notifikasi</span>
+              <span class="badge badge-blue" style="font-size:10px">${notifCount} baru</span>
+            </div>
+            <div style="max-height:260px;overflow-y:auto">${notifItems || '<p style="padding:16px;text-align:center;font-size:12px;color:#94a3b8">Tiada notifikasi</p>'}</div>
+            <div style="padding:8px 14px;text-align:center;border-top:1px solid #f1f5f9">
+              <a href="reports.html" style="font-size:12px;font-weight:600;color:var(--accent-600);text-decoration:none">Lihat semua aktiviti →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="ehPortal.logout()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/></svg>
+          <span class="tb-tip">Log Keluar</span>
+        </button>
+      </div>`;
+  },
+
+  /* ── Toggle panels ──────────────────────────────────────── */
+  toggleSettings(e) {
+    e.stopPropagation();
+    document.getElementById('settings-panel').classList.toggle('open');
+    document.getElementById('notif-panel').classList.remove('open');
+  },
+
+  toggleNotif(e) {
+    e.stopPropagation();
+    document.getElementById('notif-panel').classList.toggle('open');
+    document.getElementById('settings-panel').classList.remove('open');
   },
 
   /* ── Main init ──────────────────────────────────────────── */
@@ -178,49 +233,63 @@ const ehPortal = {
       ? { page: config, title: config }
       : config;
 
-    // Auth check
     const user = this.checkAuth();
     if (!user) return;
 
-    // Inject sidebar
+    // apply saved theme
+    this.applyThemeColor(this.getThemeColor());
+
+    // inject sidebar
     const sidebarEl = document.getElementById('sidebar');
     if (sidebarEl) sidebarEl.innerHTML = this.buildSidebar(page);
 
-    // Inject topbar
+    // inject topbar
     const topbarEl = document.getElementById('topbar');
     if (topbarEl) topbarEl.innerHTML = this.buildTopbar(title);
 
-    // Mobile menu
     this._setupMobileMenu();
+    this._setupOutsideClick();
   },
 
   _setupMobileMenu() {
-    document.addEventListener('click', (e) => {
-      const btn = document.getElementById('menu-btn');
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-
-      if (btn && btn.contains(e.target)) {
+    const btn = document.getElementById('menu-btn');
+    if (btn) {
+      btn.style.display = '';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
         sidebar && sidebar.classList.toggle('-translate-x-full');
         overlay && overlay.classList.toggle('hidden');
-        return;
-      }
-      if (overlay && overlay.contains(e.target)) {
+      });
+    }
+  },
+
+  _setupOutsideClick() {
+    document.addEventListener('click', (e) => {
+      // close sidebar overlay
+      const overlay = document.getElementById('sidebar-overlay');
+      if (overlay && !overlay.classList.contains('hidden') && overlay.contains(e.target)) {
+        const sidebar = document.getElementById('sidebar');
         sidebar && sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
         return;
       }
-      // Close notifications on outside click
-      const notifBtn = document.querySelector('[onclick="toggleNotifications()"]');
+      // close dropdowns
+      const settingsPanel = document.getElementById('settings-panel');
       const notifPanel = document.getElementById('notif-panel');
+      const settingsBtn = document.getElementById('settings-btn');
+      const notifBtn = document.getElementById('notif-btn');
+
+      if (settingsPanel && settingsBtn && !settingsBtn.contains(e.target) && !settingsPanel.contains(e.target)) {
+        settingsPanel.classList.remove('open');
+      }
       if (notifPanel && notifBtn && !notifBtn.contains(e.target) && !notifPanel.contains(e.target)) {
-        notifPanel.classList.add('hidden');
+        notifPanel.classList.remove('open');
       }
     });
   }
 };
 
-function toggleNotifications() {
-  const panel = document.getElementById('notif-panel');
-  if (panel) panel.classList.toggle('hidden');
-}
+// legacy compat
+function toggleNotifications() { ehPortal.toggleNotif({ stopPropagation: () => {} }); }

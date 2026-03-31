@@ -9,7 +9,7 @@ useHead({
 
 const loading = ref(true);
 
-onMounted(() => {
+onMounted(async () => {
   // Hide loading indicator if not hydrating
   setTimeout(() => {
     loading.value = false;
@@ -18,6 +18,11 @@ onMounted(() => {
   // Get theme from localStorage
   let theme = localStorage.getItem("theme") || "default";
   document.documentElement.setAttribute("data-theme", theme);
+
+  // Apply accent theme color from persisted layout store
+  const { useLayoutStore } = await import("~/stores/layout");
+  const layoutStore = useLayoutStore();
+  document.documentElement.setAttribute("data-theme-color", layoutStore.themeColor || "violet");
 });
 </script>
 

@@ -1,265 +1,253 @@
 <script setup>
-const isVertical = ref(true);
-const isDesktop = ref(true);
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useLayoutStore } from "~/stores/layout";
+import { useUserStore } from "~/stores/user";
+import { useAdminToast } from "~/composables/useAdminToast";
 
-const emit = defineEmits(["toggleMenu"]);
+const layoutStore = useLayoutStore();
+const userStore = useUserStore();
+const { toasts } = useAdminToast();
 
-// const { locale } = useI18n();
-// const colorMode = useColorMode();
-const langList = languageList();
+const settingsOpen = ref(false);
+const settingsDropdownRef = ref(null);
 
-const locale = ref("en");
+const themeChoices = [
+  { label: "Violet", value: "violet", dot: "bg-violet-500" },
+  { label: "Blue", value: "blue", dot: "bg-blue-500" },
+  { label: "Green", value: "green", dot: "bg-emerald-500" },
+  { label: "Red", value: "red", dot: "bg-rose-500" },
+  { label: "B&W", value: "black-white", dot: "bg-slate-900" },
+  { label: "Grey", value: "grey", dot: "bg-neutral-500" },
+];
 
-const themes = themeList();
-
-function setTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem("theme", theme);
-}
-
-function rgbToHex(rgbString) {
-  // Split the input string into an array of components
-  const rgbArray = rgbString.split(",");
-
-  // Convert each component to its numeric value
-  const r = parseInt(rgbArray[0].trim(), 10);
-  const g = parseInt(rgbArray[1].trim(), 10);
-  const b = parseInt(rgbArray[2].trim(), 10);
-
-  // Convert the numeric RGB values to hexadecimal
-  const rHex = r.toString(16).padStart(2, "0");
-  const gHex = g.toString(16).padStart(2, "0");
-  const bHex = b.toString(16).padStart(2, "0");
-
-  // Concatenate the components and return the final hexadecimal color code
-  return `#${rHex}${gHex}${bHex}`;
-}
-
-// Toggle Open/Close menu
-const toggleMenu = (event) => {
-  emit("toggleMenu", event);
-};
-
-// Focus on search input
-function toggleSearch() {
-  document.getElementById("header-search").value = "";
-  document.getElementById("header-search").focus();
-}
-
-// Change language
-const changeLanguage = (lang) => {
-  locale.value = lang;
-};
-
-const languageNow = computed(() => {
-  return langList.find((lang) => lang.value == locale.value);
+const userInitials = computed(() => {
+  const name = userStore.user?.name || "Admin";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 });
 
+const userName = computed(() => {
+  const name = userStore.user?.name || "Admin";
+  return name.length > 20 ? name.slice(0, 20) + "..." : name;
+});
+
+const userRole = computed(() => userStore.user?.role || "Administrator");
+
+const latestToast = computed(() => toasts.value.at(-1) ?? null);
+
+function toastVariantClass(variant) {
+  if (variant === "success")
+    return "bg-gradient-to-br from-emerald-200 to-emerald-100 text-emerald-950";
+  if (variant === "error")
+    return "bg-gradient-to-br from-rose-200 to-rose-100 text-rose-950";
+  return "bg-gradient-to-br from-blue-200 to-blue-100 text-blue-950";
+}
+
+function toastIconClass(variant) {
+  if (variant === "success") return "bg-emerald-200 text-emerald-800";
+  if (variant === "error") return "bg-rose-200 text-rose-800";
+  return "bg-blue-200 text-blue-800";
+}
+
+function handleDocumentClick(event) {
+  if (!settingsOpen.value) return;
+  if (!settingsDropdownRef.value) return;
+  if (settingsDropdownRef.value.contains(event.target)) return;
+  settingsOpen.value = false;
+}
+
+function handleEscape(event) {
+  if (event.key === "Escape") settingsOpen.value = false;
+}
+
 onMounted(() => {
-  // If mobile toggleMenu
-  if (window.innerWidth < 768) {
-    emit("toggleMenu", true);
-  }
+  document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("keydown", handleEscape);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleDocumentClick);
+  document.removeEventListener("keydown", handleEscape);
 });
 </script>
 
 <template>
-  <div class="w-header">
-    <div class="flex items-stretch justify-between">
-      <div v-if="isVertical" class="flex">
-        <span class="flex items-center justify-center">
-          <button class="icon-btn h-10 w-10 rounded-full" @click="toggleMenu">
-            <Icon name="ic:round-menu" class="" /></button
-        ></span>
-      </div>
-      <div class="flex" v-else>
-        <nuxt-link to="/">
-          <div class="flex flex-auto gap-3 justify-center items-center">
-            <img class="h-24 block" src="@/assets/img/logo/logo-word-black-ui.svg" alt="" />
-          </div>
-        </nuxt-link>
-      </div>
-
-      <div class="flex gap-2 item-center justify-items-end">
-        <VDropdown placement="bottom-end" distance="13" name="language">
-          <button class="icon-btn h-10 w-10 rounded-full">
-            <country-flag :country="languageNow.flagCode" />
-          </button>
-          <template #popper>
-            <ul class="header-dropdown w-full md:w-32">
-              <li
-                v-for="lang in langList"
-                class="flex items-center justify-center hover:bg-[rgb(var(--bg-1))]"
-              >
-                <button
-                  @click="changeLanguage(lang.value)"
-                  class="w-full py-2 px-2 flex justify-center items-center h-10"
-                >
-                  <div class="ml-3 flex justify-center items-center">
-                    <country-flag :country="lang.flagCode" />
-                  </div>
-                  <span class="grow">{{ lang.name }}</span>
-                </button>
-              </li>
-            </ul>
-          </template>
-        </VDropdown>
-        <VDropdown placement="bottom-end" distance="13" name="theme">
-          <button class="icon-btn h-10 w-10 rounded-full">
-            <Icon size="22px" name="material-symbols:format-paint-rounded" />
-          </button>
-          <template #popper>
-            <ul class="header-dropdown w-full md:w-52">
-              <li v-for="(val, index) in themes">
-                <a
-                  @click="setTheme(val.theme)"
-                  class="flex justify-between items-center cursor-pointer py-2 px-4 hover:bg-[rgb(var(--bg-1))]"
-                >
-                  <span class="capitalize"> {{ val.theme }} </span>
-                  <div class="flex items-center gap-x-1">
-                    <div
-                      v-for="(color, index) in val.colors"
-                      class="h-[25px] w-[10px] rounded-lg"
-                      :style="{
-                        backgroundColor: rgbToHex(color.value),
-                      }"
-                    ></div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </template>
-        </VDropdown>
-
-        <button @click="toggleSearch" class="icon-btn h-10 w-10 rounded-full">
-          <Icon name="ic:round-search" class="" />
-        </button>
-
-        <VDropdown placement="bottom-end" distance="13" name="notification">
-          <button class="relative icon-btn h-10 w-10 rounded-full">
-            <span
-              class="w-3 h-3 absolute top-1 right-2 rounded-full bg-primary"
-            ></span>
-            <Icon name="ic:round-notifications-none" class="" />
-          </button>
-          <template #popper>
-            <ul class="header-dropdown w-full md:w-80 text-[#4B5563]">
-              <li class="d-head flex items-center justify-between py-2 px-4">
-                <span class="font-semibold">Notification</span>
-                <div
-                  class="flex items-center text-primary cursor-pointer hover:underline"
-                >
-                  <a class="ml-2">View All</a>
-                </div>
-              </li>
-              <NuxtScrollbar>
-                <li>
-                  <div class="bg-[rgb(var(--bg-1))] py-2 px-4">Today</div>
-                  <a class="py-2 px-4 block">
-                    <div class="flex items-center">
-                      <Icon
-                        name="ic:outline-circle"
-                        class="text-primary flex-none"
-                      />
-                      <span class="mx-2"
-                        >Terdapat Satu Pembayaran yang berlaku menggunakan bil
-                        Kuih Raya Cik Kiah</span
-                      >
-                      <div class="w-12 h-12 rounded-full ml-auto flex-none">
-                        <img
-                          class="rounded-full"
-                          src="@/assets/img/user/default.svg"
-                        />
-                      </div>
-                    </div>
-                  </a>
-                  <a class="py-2 px-4 block">
-                    <div class="flex items-center">
-                      <Icon
-                        name="ic:outline-circle"
-                        class="text-primary flex-none"
-                      />
-                      <span class="mx-2"
-                        >Terdapat Satu Pembayaran yang berlaku menggunakan bil
-                        Mercun</span
-                      >
-                      <div class="w-12 h-12 rounded-full ml-auto flex-none">
-                        <img
-                          class="rounded-full"
-                          src="@/assets/img/user/default.svg"
-                          alt=""
-                        />
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </NuxtScrollbar>
-            </ul>
-          </template>
-        </VDropdown>
-
-        <VDropdown placement="bottom-end" distance="13" name="profile">
-          <button class="icon-btn profile px-2">
-            <img
-              class="w-8 h-8 object-cover rounded-full"
-              src="@/assets/img/user/default.svg"
-            />
-            <div
-              v-if="isDesktop"
-              class="grid grid-cols-1 text-left ml-3 flex-none"
-            >
-              <p class="font-semibold text-sm truncate w-24 mb-0">John Doe</p>
-              <span class="font-medium text-xs truncate w-24"
-                >RM 10,000.00</span
-              >
-            </div>
-            <Icon name="ic:outline-keyboard-arrow-down" class="ml-3" />
-          </button>
-          <template #popper>
-            <ul class="header-dropdown w-full md:w-52">
-              <li
-                class="flex items-center cursor-pointer py-2 px-4 hover:bg-[rgb(var(--bg-1))]"
-              >
-                <Icon name="ic:outline-logout" class="mr-2" />
-                Logout
-              </li>
-            </ul>
-          </template>
-        </VDropdown>
+  <header
+    class="sticky top-0 z-40 flex h-10 items-center justify-between border-b border-slate-200 bg-white px-5"
+  >
+    <!-- Left: site icon -->
+    <div class="flex items-center gap-1">
+      <div
+        class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[var(--accent-600)] to-[var(--accent-500)]"
+      >
+        <Icon name="ic:outline-shield" class="h-[11px] w-[11px] text-white" size="11px" />
       </div>
     </div>
-  </div>
 
-  <!-- Search Nav for Layout Vertical -->
-  <div tabindex="0" class="w-header-search">
-    <Icon name="ic:outline-search" class="mr-3" />
-    <FormKit
-      id="header-search"
-      :classes="{
-        outer: 'mb-0 flex-1',
-      }"
-      type="search"
-      placeholder="Search..."
-    />
-  </div>
+    <!-- Right: toast + user + settings + bell + logout -->
+    <div class="flex items-center self-stretch">
+      <!-- Toast region -->
+      <div class="flex h-full max-w-[22rem] items-stretch gap-2 overflow-hidden py-0">
+        <Transition
+          enter-active-class="transition-transform duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          enter-from-class="translate-x-[110%]"
+          enter-to-class="translate-x-0"
+          leave-active-class="transition-transform duration-[1500ms] ease-[cubic-bezier(0.4,0,1,1)]"
+          leave-from-class="translate-x-0"
+          leave-to-class="translate-x-[110%]"
+        >
+          <div
+            v-if="latestToast"
+            :key="latestToast.id"
+            class="relative flex h-full min-w-[14rem] items-center overflow-hidden px-2 py-1 shadow-sm will-change-transform"
+            :class="toastVariantClass(latestToast.variant)"
+          >
+            <div class="flex items-center gap-2">
+              <div class="rounded-full p-0.5" :class="toastIconClass(latestToast.variant)">
+                <Icon
+                  v-if="latestToast.variant === 'success'"
+                  name="ic:outline-check-circle"
+                  size="14px"
+                  class="shrink-0"
+                />
+                <Icon
+                  v-else-if="latestToast.variant === 'error'"
+                  name="ic:outline-cancel"
+                  size="14px"
+                  class="shrink-0"
+                />
+                <Icon v-else name="ic:outline-info" size="14px" class="shrink-0" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-[10px] font-semibold uppercase leading-none tracking-[0.11em] opacity-70">
+                  {{ latestToast.variant }}
+                </p>
+                <p class="mt-[2px] truncate text-xs font-semibold leading-tight">
+                  {{ latestToast.title
+                  }}<span v-if="latestToast.message" class="font-normal opacity-90">
+                    - {{ latestToast.message }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
+
+      <span class="h-full w-px bg-slate-200" />
+
+      <!-- User profile -->
+      <div
+        class="group relative flex h-full items-center gap-2 px-4 transition-colors hover:bg-[var(--accent-600)] cursor-pointer"
+      >
+        <div
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent-600)] to-[var(--accent-500)] text-[10px] font-semibold text-white"
+        >
+          {{ userInitials }}
+        </div>
+        <div class="leading-tight">
+          <p class="text-sm font-medium text-slate-700 group-hover:text-white">{{ userName }}</p>
+          <p class="text-[11px] text-slate-500 group-hover:text-white/80">{{ userRole }}</p>
+        </div>
+        <span
+          class="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+        >Profile</span>
+      </div>
+
+      <span class="h-full w-px bg-slate-200" />
+
+      <!-- Settings dropdown -->
+      <div ref="settingsDropdownRef" class="relative flex h-full items-stretch">
+        <button
+          class="group relative flex h-full items-center px-4 text-slate-500 transition-colors hover:bg-[var(--accent-600)] hover:text-white"
+          @click.stop="settingsOpen = !settingsOpen"
+        >
+          <Icon name="ic:outline-settings" size="16px" />
+          <span
+            class="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+          >Settings</span>
+        </button>
+
+        <div
+          v-if="settingsOpen"
+          class="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-3 shadow-lg"
+        >
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Theme color
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              v-for="theme in themeChoices"
+              :key="theme.value"
+              class="flex items-center justify-between rounded-md border px-2.5 py-2 text-xs font-medium transition-colors"
+              :class="
+                layoutStore.themeColor === theme.value
+                  ? 'border-[var(--accent-500)] bg-[var(--accent-50)] text-[var(--accent-700)]'
+                  : 'border-slate-200 text-slate-600 hover:border-[var(--accent-ring)] hover:text-slate-900'
+              "
+              @click="layoutStore.setThemeColor(theme.value)"
+            >
+              <span class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full" :class="theme.dot" />
+                {{ theme.label }}
+              </span>
+              <Icon
+                v-if="layoutStore.themeColor === theme.value"
+                name="ic:outline-check"
+                size="14px"
+              />
+            </button>
+          </div>
+
+          <div class="mt-3 border-t border-slate-200 pt-3">
+            <button
+              class="flex w-full items-center justify-between rounded-md border border-slate-200 px-2.5 py-2 text-xs font-medium text-slate-700 transition-colors hover:border-[var(--accent-ring)]"
+              @click="layoutStore.toggleCompact()"
+            >
+              <span>Compact sidebar</span>
+              <span
+                class="relative inline-flex h-4 w-7 items-center rounded-full transition-colors"
+                :class="layoutStore.isCompact ? 'bg-[var(--accent-600)]' : 'bg-slate-300'"
+              >
+                <span
+                  class="inline-block h-3 w-3 transform rounded-full bg-white transition"
+                  :class="layoutStore.isCompact ? 'translate-x-3.5' : 'translate-x-0.5'"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <span class="h-full w-px bg-slate-200" />
+
+      <!-- Notifications -->
+      <button
+        class="group relative flex h-full items-center px-4 text-slate-500 transition-colors hover:bg-[var(--accent-600)] hover:text-white"
+      >
+        <Icon name="ic:round-notifications-none" size="16px" />
+        <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+        <span
+          class="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+        >Notifications</span>
+      </button>
+
+      <span class="h-full w-px bg-slate-200" />
+
+      <!-- Logout -->
+      <NuxtLink
+        to="/auth/login-v1"
+        class="group relative flex h-full items-center px-4 text-slate-500 transition-colors hover:bg-[var(--accent-600)] hover:text-white"
+      >
+        <Icon name="ic:outline-logout" size="16px" />
+        <span
+          class="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+        >Logout</span>
+      </NuxtLink>
+    </div>
+  </header>
 </template>
-
-<style scoped>
-:deep(.popper) {
-  background: #e92791;
-  padding: 20px;
-  border-radius: 20px;
-  color: #fff;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-:deep(.popper #arrow::before) {
-  background: #e92791;
-}
-
-:deep(.popper:hover),
-:deep(.popper:hover > #arrow::before) {
-  background: #e92791;
-}
-</style>
